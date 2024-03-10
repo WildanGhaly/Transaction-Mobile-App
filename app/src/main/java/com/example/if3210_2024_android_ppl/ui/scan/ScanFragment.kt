@@ -1,4 +1,4 @@
-package com.example.if3210_2024_android_ppl.ui.notifications
+package com.example.if3210_2024_android_ppl.ui.scan
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.if3210_2024_android_ppl.databinding.FragmentNotificationsBinding
+import com.example.if3210_2024_android_ppl.databinding.FragmentScanBinding
 
-class NotificationsFragment : Fragment() {
+class ScanFragment : Fragment() {
 
-    private var _binding: FragmentNotificationsBinding? = null
+    private var _binding: FragmentScanBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -22,14 +22,14 @@ class NotificationsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val notificationsViewModel =
-            ViewModelProvider(this).get(NotificationsViewModel::class.java)
+        val scanViewModel =
+            ViewModelProvider(this).get(ScanViewModel::class.java)
 
-        _binding = FragmentNotificationsBinding.inflate(inflater, container, false)
+        _binding = FragmentScanBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textNotifications
-        notificationsViewModel.text.observe(viewLifecycleOwner) {
+        val textView: TextView = binding.textScan
+        scanViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
         return root
