@@ -9,6 +9,7 @@
         android:id="@+id/navigation_transaction"
         android:name="com.example.if3210_2024_android_ppl.ui.transaction.TransactionFragment"
         android:label="@string/title_transaction"
+        android:textAppearance="@style/MontserratBoldText"
         tools:layout="@layout/fragment_transaction" />
 
     <fragment
