@@ -20,8 +20,8 @@
         android:layout_marginTop="20dp">
 
         <ImageView
-            android:layout_width="150dp"
-            android:layout_height="150dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:src="@drawable/minum_java"
             android:contentDescription="@string/drink_java_logo" />
 
@@ -51,17 +51,18 @@
                 android:textStyle="bold"
                 android:fontFamily="@font/montserrat_semi_bold"
                 android:textSize="18sp"
-                android:layout_marginStart="5dp"
+                android:layout_marginStart="0dp"
                 android:textColor="@android:color/black"/>
 
             <EditText
                 android:id="@+id/editTextEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/textbox"
+                android:background="@drawable/login_input_field"
                 android:inputType="textEmailAddress"
-                android:padding="18dp"
+                android:padding="15dp"
                 android:textColor="@android:color/black"
+                android:textSize="18sp"
                 android:labelFor="@+id/login_text_email"
                 android:hint="@string/insert_your_email"
                 android:autofillHints="" />
@@ -82,7 +83,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/montserrat_semi_bold"
                 android:text="@string/password"
-                android:layout_marginStart="5dp"
+                android:layout_marginStart="0dp"
                 android:textStyle="bold"
                 android:textSize="18sp"
                 android:textColor="@android:color/black"/>
@@ -91,9 +92,9 @@
                 android:id="@+id/editTextPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/textbox"
+                android:background="@drawable/login_input_field"
                 android:textColor="@android:color/black"
-                android:padding="18dp"
+                android:padding="15dp"
                 android:inputType="textPassword"
                 android:autofillHints="Insert your password"
                 android:labelFor="@+id/login_text_password"
