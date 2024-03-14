@@ -21,6 +21,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding // Binding untuk layout XML login
     private lateinit var mUserViewModel: UserViewModel
     private lateinit var loadingDialog: AlertDialog
+    private var isLoginInProgress = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,46 +30,51 @@ class LoginActivity : AppCompatActivity() {
         mUserViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
 
         binding.buttonLogin.setOnClickListener {
-            val email = binding.editTextEmail.text.toString()
-            val password = binding.editTextPassword.text.toString()
+            if (!isLoginInProgress) {
+                isLoginInProgress = true
+                val email = binding.editTextEmail.text.toString()
+                val password = binding.editTextPassword.text.toString()
 
-            if (email.isEmpty() || password.isEmpty()) {
-                Log.d("LoginActivity", "Email or password is empty")
-            } else {
-                showLoadingDialog()
-                Log.d("LoginActivity", "Email: $email, Password: $password")
+                if (email.isEmpty() || password.isEmpty()) {
+                    Log.d("LoginActivity", "Email or password is empty")
+                } else {
+                    showLoadingDialog()
+                    Log.d("LoginActivity", "Email: $email, Password: $password")
 
-                RetrofitInstance.api.login(LoginRequest(email, password))
-                    .enqueue(object : Callback<LoginResponse> {
-                        override fun onResponse(
-                            call: Call<LoginResponse>,
-                            response: Response<LoginResponse>
-                        ) {
-                            hideLoadingDialog()
-                            if (response.isSuccessful) {
-                                val loginResponse = response.body()
-                                // Handle successful login response
-                                if (loginResponse != null) {
-                                    Log.d("LoginActivity", "Login successful, Token: ${loginResponse.token}")
-                                    val user1 = User(null, email, loginResponse.token)
-                                    mUserViewModel.addUser(user1)
-                                    val intent = Intent(this@LoginActivity, MainActivity::class.java)
-                                    startActivity(intent)
-                                    finish()
+                    RetrofitInstance.api.login(LoginRequest(email, password))
+                        .enqueue(object : Callback<LoginResponse> {
+                            override fun onResponse(
+                                call: Call<LoginResponse>,
+                                response: Response<LoginResponse>
+                            ) {
+                                isLoginInProgress = false
+                                hideLoadingDialog()
+                                if (response.isSuccessful) {
+                                    val loginResponse = response.body()
+                                    // Handle successful login response
+                                    if (loginResponse != null) {
+                                        Log.d("LoginActivity", "Login successful, Token: ${loginResponse.token}")
+                                        val user1 = User(null, email, loginResponse.token)
+                                        mUserViewModel.addUser(user1)
+                                        val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                                        startActivity(intent)
+                                        finish()
+                                    }
+                                } else {
+                                    // Handle unsuccessful login response
+                                    showLoginFailedDialog()
+                                    Log.d("LoginActivity", "Login failed")
                                 }
-                            } else {
-                                // Handle unsuccessful login response
-                                showLoginFailedDialog()
-                                Log.d("LoginActivity", "Login failed")
                             }
-                        }
 
-                        override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
-                            // Handle failure
-                            Log.e("LoginActivity", "Login failed", t)
-                            showLoginFailedDialog()
-                        }
-                    })
+                            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                                isLoginInProgress = false
+                                // Handle failure
+                                Log.e("LoginActivity", "Login failed", t)
+                                showLoginFailedDialog()
+                            }
+                        })
+                }
             }
         }
     }
