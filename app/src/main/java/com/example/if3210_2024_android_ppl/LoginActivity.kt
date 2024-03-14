@@ -1,7 +1,10 @@
 package com.example.if3210_2024_android_ppl
 import android.app.AlertDialog
+import android.content.Context
 import android.util.Log
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.Button
@@ -18,7 +21,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class LoginActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityLoginBinding // Binding untuk layout XML login
+    private lateinit var binding: ActivityLoginBinding
     private lateinit var mUserViewModel: UserViewModel
     private lateinit var loadingDialog: AlertDialog
     private var isLoginInProgress = false
@@ -38,45 +41,58 @@ class LoginActivity : AppCompatActivity() {
                 if (email.isEmpty() || password.isEmpty()) {
                     Log.d("LoginActivity", "Email or password is empty")
                 } else {
-                    showLoadingDialog()
-                    Log.d("LoginActivity", "Email: $email, Password: $password")
+                    if (isNetworkAvailable(this)) {
+                        showLoadingDialog()
+                        Log.d("LoginActivity", "Email: $email, Password: $password")
 
-                    RetrofitInstance.api.login(LoginRequest(email, password))
-                        .enqueue(object : Callback<LoginResponse> {
-                            override fun onResponse(
-                                call: Call<LoginResponse>,
-                                response: Response<LoginResponse>
-                            ) {
-                                isLoginInProgress = false
-                                hideLoadingDialog()
-                                if (response.isSuccessful) {
-                                    val loginResponse = response.body()
-                                    // Handle successful login response
-                                    if (loginResponse != null) {
-                                        Log.d("LoginActivity", "Login successful, Token: ${loginResponse.token}")
-                                        val user1 = User(null, email, loginResponse.token)
-                                        mUserViewModel.addUser(user1)
-                                        val intent = Intent(this@LoginActivity, MainActivity::class.java)
-                                        startActivity(intent)
-                                        finish()
+                        RetrofitInstance.api.login(LoginRequest(email, password))
+                            .enqueue(object : Callback<LoginResponse> {
+                                override fun onResponse(
+                                    call: Call<LoginResponse>,
+                                    response: Response<LoginResponse>
+                                ) {
+                                    isLoginInProgress = false
+                                    hideLoadingDialog()
+                                    if (response.isSuccessful) {
+                                        val loginResponse = response.body()
+                                        if (loginResponse != null) {
+                                            Log.d(
+                                                "LoginActivity",
+                                                "Login successful, Token: ${loginResponse.token}"
+                                            )
+                                            val user1 = User(null, email, loginResponse.token)
+                                            mUserViewModel.addUser(user1)
+                                            val intent =
+                                                Intent(this@LoginActivity, MainActivity::class.java)
+                                            startActivity(intent)
+                                            finish()
+                                        }
+                                    } else {
+                                        showLoginFailedDialog()
+                                        Log.d("LoginActivity", "Login failed")
                                     }
-                                } else {
-                                    // Handle unsuccessful login response
-                                    showLoginFailedDialog()
-                                    Log.d("LoginActivity", "Login failed")
                                 }
-                            }
 
-                            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
-                                isLoginInProgress = false
-                                // Handle failure
-                                Log.e("LoginActivity", "Login failed", t)
-                                showLoginFailedDialog()
-                            }
-                        })
+                                override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                                    isLoginInProgress = false
+                                    Log.e("LoginActivity", "Login failed", t)
+                                    showLoginFailedDialog()
+                                }
+                            })
+                    } else {
+                        showNoInternetDialog()
+                        isLoginInProgress = false
+                    }
                 }
             }
         }
+    }
+
+    private fun isNetworkAvailable(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val networkCapabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
     private fun showLoadingDialog() {
@@ -106,5 +122,17 @@ class LoginActivity : AppCompatActivity() {
         }
 
         customDialog.show()
+    }
+
+    private fun showNoInternetDialog() {
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("No Internet Connection")
+            .setMessage("Please check your internet connection and try again.")
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+
+        dialog.show()
     }
 }
