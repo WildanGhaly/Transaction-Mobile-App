@@ -98,7 +98,7 @@ class LoginActivity : AppCompatActivity() {
     private fun showLoadingDialog() {
         val builder = AlertDialog.Builder(this)
         val inflater = layoutInflater
-        builder.setView(inflater.inflate(R.layout.dialog_login, null))
+        builder.setView(inflater.inflate(R.layout.dialog_loading, null))
         builder.setCancelable(false) // Make it not cancellable
 
         loadingDialog = builder.create()
@@ -125,14 +125,15 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun showNoInternetDialog() {
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("No Internet Connection")
-            .setMessage("Please check your internet connection and try again.")
-            .setPositiveButton("OK") { dialog, _ ->
-                dialog.dismiss()
-            }
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_no_internet, null)
+        val customDialog = AlertDialog.Builder(this)
+            .setView(dialogView)
             .create()
 
-        dialog.show()
+        dialogView.findViewById<Button>(R.id.buttonTryAgain).setOnClickListener {
+            customDialog.dismiss()
+        }
+
+        customDialog.show()
     }
 }
