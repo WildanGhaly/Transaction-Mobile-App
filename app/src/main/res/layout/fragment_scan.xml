@@ -22,29 +22,29 @@
         android:layout_centerInParent="true"
         android:src="@drawable/red_frame"
         android:contentDescription="frame" />
-    <Button
-        android:id="@+id/shutterButton"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:background="@drawable/red_but_circle"
+    <ImageButton
+        android:id="@+id/shutterBut"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:background="@drawable/shutter"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="175dp"
         android:layout_centerInParent="true"
         />
-    <Button
-        android:id="@+id/imageButton"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:background="@drawable/white_but_circle"
+    <ImageButton
+        android:id="@+id/pictBut"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@drawable/image"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="70dp"
         android:layout_marginStart="30dp"
         />
-    <Button
-        android:id="@+id/flashButton"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:background="@drawable/white_but_circle"
+    <ImageButton
+        android:id="@+id/flashBut"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@drawable/flash"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="70dp"
         android:layout_alignParentEnd="true"
