@@ -19,6 +19,7 @@ import com.example.if3210_2024_android_ppl.databinding.ActivityLoginBinding
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.net.SocketTimeoutException
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
@@ -75,8 +76,16 @@ class LoginActivity : AppCompatActivity() {
 
                                 override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
                                     isLoginInProgress = false
-                                    Log.e("LoginActivity", "Login failed", t)
-                                    showLoginFailedDialog()
+                                    hideLoadingDialog()
+                                    if (t is SocketTimeoutException) {
+                                        // Handle timeout
+                                        Log.e("LoginActivity", "Request timed out")
+                                        showTimeoutDialog()
+                                    } else {
+                                        // Handle other failures
+                                        Log.e("LoginActivity", "Login failed", t)
+                                        showLoginFailedDialog()
+                                    }
                                 }
                             })
                     } else {
@@ -118,6 +127,7 @@ class LoginActivity : AppCompatActivity() {
             .create()
 
         dialogView.findViewById<Button>(R.id.buttonTryAgain).setOnClickListener {
+            hideLoadingDialog()
             customDialog.dismiss()
         }
 
@@ -131,6 +141,21 @@ class LoginActivity : AppCompatActivity() {
             .create()
 
         dialogView.findViewById<Button>(R.id.buttonTryAgain).setOnClickListener {
+            hideLoadingDialog()
+            customDialog.dismiss()
+        }
+
+        customDialog.show()
+    }
+
+    private fun showTimeoutDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_timeout, null)
+        val customDialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        dialogView.findViewById<Button>(R.id.buttonTryAgain).setOnClickListener {
+            hideLoadingDialog()
             customDialog.dismiss()
         }
 
