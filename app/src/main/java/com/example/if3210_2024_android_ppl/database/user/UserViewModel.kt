@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class UserViewModel(application: Application): AndroidViewModel(application) {
 
@@ -24,4 +25,12 @@ class UserViewModel(application: Application): AndroidViewModel(application) {
         }
     }
 
+    fun getTokenByEmail(email: String, callback: (String?) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val token = repository.getTokenByEmail(email)
+            withContext(Dispatchers.Main) {
+                callback(token)
+            }
+        }
+    }
 }
