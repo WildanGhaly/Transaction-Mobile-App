@@ -1,4 +1,5 @@
 package com.example.if3210_2024_android_ppl
+import android.app.AlertDialog
 import android.util.Log
 import android.content.Intent
 import android.os.Bundle
@@ -17,6 +18,7 @@ import retrofit2.Response
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding // Binding untuk layout XML login
     private lateinit var mUserViewModel: UserViewModel
+    private lateinit var loadingDialog: AlertDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +33,7 @@ class LoginActivity : AppCompatActivity() {
             if (email.isEmpty() || password.isEmpty()) {
                 Log.d("LoginActivity", "Email or password is empty")
             } else {
+                showLoadingDialog()
                 Log.d("LoginActivity", "Email: $email, Password: $password")
 
                 RetrofitInstance.api.login(LoginRequest(email, password))
@@ -39,6 +42,7 @@ class LoginActivity : AppCompatActivity() {
                             call: Call<LoginResponse>,
                             response: Response<LoginResponse>
                         ) {
+                            hideLoadingDialog()
                             if (response.isSuccessful) {
                                 val loginResponse = response.body()
                                 // Handle successful login response
@@ -62,6 +66,22 @@ class LoginActivity : AppCompatActivity() {
                         }
                     })
             }
+        }
+    }
+
+    private fun showLoadingDialog() {
+        val builder = AlertDialog.Builder(this)
+        val inflater = layoutInflater
+        builder.setView(inflater.inflate(R.layout.loading_dialog, null))
+        builder.setCancelable(false) // Make it not cancellable
+
+        loadingDialog = builder.create()
+        loadingDialog.show()
+    }
+
+    private fun hideLoadingDialog() {
+        if (::loadingDialog.isInitialized && loadingDialog.isShowing) {
+            loadingDialog.dismiss()
         }
     }
 }
