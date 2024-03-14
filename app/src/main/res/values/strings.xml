@@ -4,4 +4,21 @@
     <string name="title_scan">Scan</string>
     <string name="title_graph">Graph</string>
     <string name="title_setting">Setting</string>
+    <string name="login">LOGIN</string>
+    <string name="login_button_text">Login</string>
+    <string name="password">Password</string>
+    <string name="email">Email</string>
+    <string name="drink_java_logo">drink java logo</string>
+    <string name="button_for_sign_in">button for login</string>
+    <string name="insert_your_email">Insert your email</string>
+    <string name="insert_your_password">Insert your password</string>
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome!"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
 </resources>
