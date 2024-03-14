@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:text="@string/login"
             android:textColor="@color/red_java"
-            android:fontFamily="@font/montserrat_semi_bold"
+            android:textFontWeight="600"
             android:textSize="32sp"
             android:layout_marginTop="20dp"
             />
@@ -48,8 +48,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/email"
-                android:textStyle="bold"
-                android:fontFamily="@font/montserrat_semi_bold"
+                android:textFontWeight="600"
                 android:textSize="18sp"
                 android:layout_marginStart="0dp"
                 android:textColor="@android:color/black"/>
@@ -81,10 +80,9 @@
                 android:id="@+id/login_text_password"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/montserrat_semi_bold"
+                android:textFontWeight="600"
                 android:text="@string/password"
                 android:layout_marginStart="0dp"
-                android:textStyle="bold"
                 android:textSize="18sp"
                 android:textColor="@android:color/black"/>
 
@@ -109,7 +107,7 @@
             android:layout_height="wrap_content"
             android:text="@string/login_button_text"
             android:textSize="18sp"
-            android:fontFamily="@font/montserrat_semi_bold"
+            android:textFontWeight="700"
             android:textColor="@android:color/white"
             android:background="@drawable/rounded_button"
             android:paddingStart="40dp"
