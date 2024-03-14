@@ -3,6 +3,8 @@ import android.app.AlertDialog
 import android.util.Log
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.if3210_2024_android_ppl.api.LoginRequest
@@ -56,6 +58,7 @@ class LoginActivity : AppCompatActivity() {
                                 }
                             } else {
                                 // Handle unsuccessful login response
+                                showLoginFailedDialog()
                                 Log.d("LoginActivity", "Login failed")
                             }
                         }
@@ -63,6 +66,7 @@ class LoginActivity : AppCompatActivity() {
                         override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
                             // Handle failure
                             Log.e("LoginActivity", "Login failed", t)
+                            showLoginFailedDialog()
                         }
                     })
             }
@@ -72,7 +76,7 @@ class LoginActivity : AppCompatActivity() {
     private fun showLoadingDialog() {
         val builder = AlertDialog.Builder(this)
         val inflater = layoutInflater
-        builder.setView(inflater.inflate(R.layout.loading_dialog, null))
+        builder.setView(inflater.inflate(R.layout.dialog_login, null))
         builder.setCancelable(false) // Make it not cancellable
 
         loadingDialog = builder.create()
@@ -83,5 +87,18 @@ class LoginActivity : AppCompatActivity() {
         if (::loadingDialog.isInitialized && loadingDialog.isShowing) {
             loadingDialog.dismiss()
         }
+    }
+
+    private fun showLoginFailedDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_login_fail, null)
+        val customDialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        dialogView.findViewById<Button>(R.id.buttonTryAgain).setOnClickListener {
+            customDialog.dismiss()
+        }
+
+        customDialog.show()
     }
 }
