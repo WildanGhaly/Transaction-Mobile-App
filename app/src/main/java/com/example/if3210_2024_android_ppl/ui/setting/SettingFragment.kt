@@ -28,11 +28,23 @@ class SettingFragment : Fragment() {
         _binding = FragmentSettingBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-//        val textView: TextView = binding.textSetting
-//        settingViewModel.text.observe(viewLifecycleOwner) {
-//            textView.text = it
-//        }
+        setupButtonListeners()
+
         return root
+    }
+
+    private fun setupButtonListeners() {
+        binding.buttonSendTransaction.setOnClickListener {
+            // TODO: Handle send transaction button click
+        }
+
+        binding.buttonSaveTransaction.setOnClickListener {
+            // TODO: Handle save transaction button click
+        }
+
+        binding.buttonBelow.setOnClickListener {
+            // TODO: Handle logout button click
+        }
     }
 
     override fun onDestroyView() {
