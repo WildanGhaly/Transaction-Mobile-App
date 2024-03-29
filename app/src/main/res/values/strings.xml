@@ -22,4 +22,7 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <string name="loading">Loading...</string>
+    <string name="send_transaction">Send\nTransaction</string>
+    <string name="save_transaction">Save\nTransaction</string>
+    <string name="logout">Logout</string>
 </resources>
