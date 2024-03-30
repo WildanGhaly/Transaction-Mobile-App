@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.example.if3210_2024_android_ppl.api.KeystoreHelper
 import com.example.if3210_2024_android_ppl.api.LoginRequest
 import com.example.if3210_2024_android_ppl.api.LoginResponse
 import com.example.if3210_2024_android_ppl.api.RetrofitInstance
@@ -61,6 +62,11 @@ class LoginActivity : AppCompatActivity() {
                                                 "LoginActivity",
                                                 "Login successful, Token: ${loginResponse.token}"
                                             )
+
+                                            val keystoreHelper = KeystoreHelper(this@LoginActivity)
+                                            keystoreHelper.saveToken(loginResponse.token)
+
+                                            // TODO: CHANGE THE USER TABLE
                                             val user1 = User(null, email, loginResponse.token)
                                             mUserViewModel.addUser(user1)
                                             val intent =
