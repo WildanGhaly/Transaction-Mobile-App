@@ -42,12 +42,17 @@ class AddTransactionFragment : Fragment() {
         }
 
         setupListener(view)
+
+
+        // Check if transactionId is provided via arguments for editing
         val transactionId = arguments?.getInt("transactionId", 0)
-        Toast.makeText(requireContext(), transactionId.toString(), Toast.LENGTH_SHORT).show()
+        if (transactionId != null && transactionId != 0) {
+            // If transactionId is not null and not 0, it means it's for editing
+            populateTransactionDetails(transactionId)
+        }
 
         return view
     }
-
     private fun setupListener(view: View) {
         val saveButton = view.findViewById<Button>(R.id.buttonSave)
 
@@ -55,6 +60,24 @@ class AddTransactionFragment : Fragment() {
             saveTransaction(view)
         }
     }
+
+    private fun populateTransactionDetails(transactionId: Int) {
+        // Coroutine for fetching transaction details from the database
+        CoroutineScope(Dispatchers.IO).launch {
+            val transactions = db.transactionDao().getTransactions(transactionId)
+            if (transactions.isNotEmpty()) {
+                val transaction = transactions[0] // Get the first transaction
+                requireActivity().runOnUiThread {
+                    // Populate UI fields with transaction details
+                    view?.findViewById<EditText>(R.id.addTextTitle)?.setText(transaction.name)
+                    view?.findViewById<EditText>(R.id.addPrice)?.setText(transaction.price.toString())
+                    view?.findViewById<EditText>(R.id.addLocation)?.setText(transaction.location)
+                    view?.findViewById<AutoCompleteTextView>(R.id.addCategory)?.setText(transaction.category)
+                }
+            }
+        }
+    }
+
 
     private fun saveTransaction(view: View) {
         val titleText = view.findViewById<EditText>(R.id.addTextTitle).text.toString()
@@ -64,12 +87,35 @@ class AddTransactionFragment : Fragment() {
         val currentDate = LocalDate.now().toString()
 
         if (titleText.isNotEmpty()) {
-            CoroutineScope(Dispatchers.IO).launch {
-                db.transactionDao().addTransaction(
-                    Transaction(0, 0, titleText, priceText, locationText, currentDate, categoryText)
-                )
-                requireActivity().runOnUiThread {
-                    findNavController().navigateUp()
+            // Check if transactionId is provided via arguments for editing
+            val transactionId = arguments?.getInt("transactionId", 0)
+            if (transactionId != null && transactionId != 0) {
+                // If transactionId is provided and not 0, update the existing transaction
+                CoroutineScope(Dispatchers.IO).launch {
+                    db.transactionDao().updateTransaction(
+                        Transaction(
+                            transactionId,
+                            0, // You may need to pass the user ID or any other relevant ID here
+                            titleText,
+                            priceText,
+                            locationText,
+                            currentDate,
+                            categoryText
+                        )
+                    )
+                    requireActivity().runOnUiThread {
+                        findNavController().navigateUp()
+                    }
+                }
+            } else {
+                // If transactionId is not provided or 0, it means it's for adding a new transaction
+                CoroutineScope(Dispatchers.IO).launch {
+                    db.transactionDao().addTransaction(
+                        Transaction(0, 0, titleText, priceText, locationText, currentDate, categoryText)
+                    )
+                    requireActivity().runOnUiThread {
+                        findNavController().navigateUp()
+                    }
                 }
             }
         } else {
@@ -77,3 +123,4 @@ class AddTransactionFragment : Fragment() {
         }
     }
 }
+

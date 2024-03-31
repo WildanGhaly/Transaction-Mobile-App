@@ -3,6 +3,7 @@ package com.example.if3210_2024_android_ppl.database.transaction
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -31,7 +32,12 @@ class TransactionAdapter (private val transactions: ArrayList<Transaction>, priv
         holder.view.findViewById<LinearLayout>(R.id.transaction_container).setOnClickListener{
             listener.onClick(transaction)
         }
+        holder.view.findViewById<ImageButton>(R.id.icon_delete).setOnClickListener {
+            listener.onClick(transaction)
+        }
     }
+
+
 
     fun setData(transactionList: List<Transaction>) {
         transactions.clear()
