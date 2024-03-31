@@ -23,4 +23,7 @@ interface UserDao {
 
     @Query("SELECT email FROM user_table WHERE isActive = 1")
     suspend fun getActiveUserEmail(): String?
+
+    @Query("UPDATE user_table SET isActive = 0")
+    suspend fun logout()
 }

@@ -11,11 +11,16 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import com.example.if3210_2024_android_ppl.LoginActivity
 import com.example.if3210_2024_android_ppl.database.transaction.Transaction
 import com.example.if3210_2024_android_ppl.database.user.UserViewModel
 import com.example.if3210_2024_android_ppl.databinding.FragmentSettingBinding
 import com.example.if3210_2024_android_ppl.util.EmailSender
 import com.example.if3210_2024_android_ppl.util.ExcelFileCreator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SettingFragment : Fragment() {
 
@@ -95,6 +100,16 @@ class SettingFragment : Fragment() {
 
         binding.buttonBelow.setOnClickListener {
             // TODO: Handle logout button click
+            lifecycleScope.launch {
+                withContext(Dispatchers.IO) {
+                    userViewModel.logout()
+                }
+                withContext(Dispatchers.Main) {
+                    val intent = Intent(activity, LoginActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                }
+            }
         }
     }
 

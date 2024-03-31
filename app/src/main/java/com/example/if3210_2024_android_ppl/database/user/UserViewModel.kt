@@ -43,4 +43,10 @@ class UserViewModel(application: Application): AndroidViewModel(application) {
         }
     }
 
+    fun logout(){
+        viewModelScope.launch(Dispatchers.IO){
+            repository.logout()
+        }
+    }
+
 }
