@@ -1,5 +1,8 @@
 package com.example.if3210_2024_android_ppl.ui.transaction
 
+import android.content.pm.PackageManager
+import android.location.Geocoder
+import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,13 +14,17 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.core.app.ActivityCompat
 import com.example.if3210_2024_android_ppl.R
 import com.example.if3210_2024_android_ppl.database.transaction.Transaction
 import com.example.if3210_2024_android_ppl.database.transaction.TransactionDatabase
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.util.*
 
 class AddTransactionFragment : Fragment() {
 
@@ -26,6 +33,8 @@ class AddTransactionFragment : Fragment() {
     private val listItem = arrayOf(
         "Pembelian", "Pemasukan"
     )
+
+    lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,6 +52,11 @@ class AddTransactionFragment : Fragment() {
 
         setupListener(view)
 
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
+        view.findViewById<EditText>(R.id.addLocation).setOnClickListener {
+            checkLocationPermission()
+        }
+
 
         // Check if transactionId is provided via arguments for editing
         val transactionId = arguments?.getInt("transactionId", 0)
@@ -58,6 +72,33 @@ class AddTransactionFragment : Fragment() {
 
         saveButton.setOnClickListener {
             saveTransaction(view)
+        }
+    }
+
+    private fun checkLocationPermission() {
+        val task = fusedLocationProviderClient.lastLocation
+        if(ActivityCompat.checkSelfPermission(requireContext(),android.Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED && ActivityCompat
+                .checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
+        ){
+            ActivityCompat.requestPermissions(requireActivity(), arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 101)
+            return
+        }
+        task.addOnSuccessListener { location ->
+            if (location != null) {
+                val geocoder = Geocoder(requireContext(), Locale.getDefault())
+                val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                if (addresses?.isNotEmpty() == true) {
+                    val address = addresses[0]
+                    val locationName = address.getAddressLine(0)
+                    Toast.makeText(requireContext(), locationName, Toast.LENGTH_SHORT).show()
+                    // Update the locationText with coordinates
+                    view?.findViewById<EditText>(R.id.addLocation)?.setText("$locationName")
+                } else {
+                    Toast.makeText(requireContext(), "Unknown Location", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 

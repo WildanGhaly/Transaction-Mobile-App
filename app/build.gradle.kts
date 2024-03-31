@@ -65,5 +65,5 @@ dependencies {
     val coroutinesVersion = "1.7.1"
     implementation("androidx.room:room-ktx:$roomVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
-
+    implementation ("com.google.android.gms:play-services-location:18.0.0")
 }
