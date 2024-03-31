@@ -33,7 +33,7 @@ class TransactionAdapter (private val transactions: ArrayList<Transaction>, priv
             listener.onClick(transaction)
         }
         holder.view.findViewById<ImageButton>(R.id.icon_delete).setOnClickListener {
-            listener.onClick(transaction)
+            listener.onDelete(transaction)
         }
     }
 
@@ -47,5 +47,6 @@ class TransactionAdapter (private val transactions: ArrayList<Transaction>, priv
 
     interface OnAdapterListener {
         fun onClick(transaction: Transaction)
+        fun onDelete(transaction: Transaction)
     }
 }

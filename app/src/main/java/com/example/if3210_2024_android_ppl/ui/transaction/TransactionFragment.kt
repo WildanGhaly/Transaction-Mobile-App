@@ -68,6 +68,12 @@ class TransactionFragment : Fragment() {
                 navController.navigate(R.id.navigation_editTransaction, bundle)
 
             }
+            override fun onDelete(transaction: Transaction) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    db.transactionDao().deleteTransaction(transaction)
+                    loadData()
+                }
+            }
 
         })
         val list_transaction: RecyclerView = binding.listTransaction
@@ -80,6 +86,10 @@ class TransactionFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+        loadData()
+    }
+
+    fun loadData() {
         CoroutineScope(Dispatchers.IO).launch {
             val transactionList = db.transactionDao().getTransactions()
             Log.d("MainActivity","dbResponse: $transactionList")
@@ -87,10 +97,6 @@ class TransactionFragment : Fragment() {
                 transactionAdapter.setData(transactionList)
             }
         }
-    }
-
-    fun intentEdit() {
-
     }
 
     override fun onDestroyView() {
