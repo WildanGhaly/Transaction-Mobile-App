@@ -20,4 +20,7 @@ interface UserDao {
 
     @Query("UPDATE user_table SET isActive = CASE WHEN id = :userId THEN 1 ELSE 0 END")
     suspend fun setActiveUser(userId: Int)
+
+    @Query("SELECT email FROM user_table WHERE isActive = 1")
+    suspend fun getActiveUserEmail(): String?
 }

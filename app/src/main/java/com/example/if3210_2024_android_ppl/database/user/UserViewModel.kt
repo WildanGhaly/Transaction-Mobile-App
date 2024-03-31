@@ -33,4 +33,14 @@ class UserViewModel(application: Application): AndroidViewModel(application) {
             }
         }
     }
+
+    fun getActiveUserEmail(callback: (String?) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val email = repository.getActiveUserEmail()
+            withContext(Dispatchers.Main) {
+                callback(email)
+            }
+        }
+    }
+
 }

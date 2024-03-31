@@ -20,4 +20,9 @@ class UserRepository(private  val userDao: UserDao) {
     suspend fun getTokenByEmail(email: String): String? {
         return userDao.getTokenByEmail(email)
     }
+
+    suspend fun getActiveUserEmail(): String? {
+        return userDao.getActiveUserEmail()
+    }
+
 }
