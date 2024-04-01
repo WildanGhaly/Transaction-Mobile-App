@@ -254,6 +254,7 @@ class ScanFragment : Fragment() {
 
     private fun rotateBitmap(bitmap: Bitmap): Bitmap {
         val rotationMatrix = Matrix()
+        rotationMatrix.postRotate(90f)
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, rotationMatrix, true)
     }
 

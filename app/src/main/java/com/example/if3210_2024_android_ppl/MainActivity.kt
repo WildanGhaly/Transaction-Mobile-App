@@ -3,13 +3,10 @@ package com.example.if3210_2024_android_ppl
 import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
 import android.app.AlertDialog
 import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
@@ -26,7 +23,6 @@ import com.example.if3210_2024_android_ppl.api.TokenResponse
 import com.example.if3210_2024_android_ppl.database.user.User
 import com.example.if3210_2024_android_ppl.database.user.UserViewModel
 import com.example.if3210_2024_android_ppl.databinding.ActivityMainBinding
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
