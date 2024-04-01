@@ -17,12 +17,12 @@ class UserRepository(private  val userDao: UserDao) {
         userDao.setActiveUser(userId)
     }
 
-    suspend fun getTokenByEmail(email: String): String? {
-        return userDao.getTokenByEmail(email)
-    }
-
     suspend fun getActiveUserEmail(): String? {
         return userDao.getActiveUserEmail()
+    }
+
+    suspend fun getActiveUserId(): Int {
+        return userDao.getActiveUserId()
     }
 
     suspend fun logout() {

@@ -1,9 +1,12 @@
 package com.example.if3210_2024_android_ppl.database.user
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
+import com.example.if3210_2024_android_ppl.api.LoginRequest
+import com.example.if3210_2024_android_ppl.api.RetrofitInstance
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -25,20 +28,20 @@ class UserViewModel(application: Application): AndroidViewModel(application) {
         }
     }
 
-    fun getTokenByEmail(email: String, callback: (String?) -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val token = repository.getTokenByEmail(email)
-            withContext(Dispatchers.Main) {
-                callback(token)
-            }
-        }
-    }
-
     fun getActiveUserEmail(callback: (String?) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             val email = repository.getActiveUserEmail()
             withContext(Dispatchers.Main) {
                 callback(email)
+            }
+        }
+    }
+
+    fun getActiveUserId(callback: (Int) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val id = repository.getActiveUserId()
+            withContext(Dispatchers.Main){
+                callback(id)
             }
         }
     }
