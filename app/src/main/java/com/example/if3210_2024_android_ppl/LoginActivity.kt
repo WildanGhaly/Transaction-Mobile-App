@@ -1,5 +1,4 @@
 package com.example.if3210_2024_android_ppl
-import android.app.AlertDialog
 import android.content.Context
 import android.util.Log
 import android.content.Intent
@@ -8,6 +7,7 @@ import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.Button
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.if3210_2024_android_ppl.api.KeystoreHelper
@@ -17,6 +17,7 @@ import com.example.if3210_2024_android_ppl.api.RetrofitInstance
 import com.example.if3210_2024_android_ppl.database.user.User
 import com.example.if3210_2024_android_ppl.database.user.UserViewModel
 import com.example.if3210_2024_android_ppl.databinding.ActivityLoginBinding
+import com.example.if3210_2024_android_ppl.util.DialogUtils
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -25,7 +26,7 @@ import java.net.SocketTimeoutException
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private lateinit var mUserViewModel: UserViewModel
-    private lateinit var loadingDialog: AlertDialog
+    private var loadingDialog: AlertDialog? = null
     private var isLoginInProgress = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,18 +34,16 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
         mUserViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
-
         binding.buttonLogin.setOnClickListener {
             if (!isLoginInProgress) {
                 isLoginInProgress = true
                 val email = binding.editTextEmail.text.toString()
                 val password = binding.editTextPassword.text.toString()
-
                 if (email.isEmpty() || password.isEmpty()) {
                     Log.d("LoginActivity", "Email or password is empty")
                 } else {
                     if (isNetworkAvailable(this)) {
-                        showLoadingDialog()
+                        loadingDialog = DialogUtils.showLoadingDialog(this)
                         Log.d("LoginActivity", "Email: $email, Password: $password")
 
                         RetrofitInstance.api.login(LoginRequest(email, password))
@@ -58,24 +57,17 @@ class LoginActivity : AppCompatActivity() {
                                     if (response.isSuccessful) {
                                         val loginResponse = response.body()
                                         if (loginResponse != null) {
-                                            Log.d(
-                                                "LoginActivity",
-                                                "Login successful, Token: ${loginResponse.token}"
-                                            )
-
+                                            Log.d("LoginActivity", "Login successful, Token: ${loginResponse.token}")
                                             val keystoreHelper = KeystoreHelper(this@LoginActivity)
                                             keystoreHelper.saveToken(loginResponse.token)
-
-                                            // TODO: CHANGE THE USER TABLE
-                                            val user1 = User(null, email, loginResponse.token)
+                                            val user1 = User(null, email)
                                             mUserViewModel.addUser(user1)
-                                            val intent =
-                                                Intent(this@LoginActivity, MainActivity::class.java)
+                                            val intent = Intent(this@LoginActivity, MainActivity::class.java)
                                             startActivity(intent)
                                             finish()
                                         }
                                     } else {
-                                        showLoginFailedDialog()
+                                        DialogUtils.showLoginFailedDialog(this@LoginActivity)
                                         Log.d("LoginActivity", "Login failed")
                                     }
                                 }
@@ -84,18 +76,16 @@ class LoginActivity : AppCompatActivity() {
                                     isLoginInProgress = false
                                     hideLoadingDialog()
                                     if (t is SocketTimeoutException) {
-                                        // Handle timeout
                                         Log.e("LoginActivity", "Request timed out")
-                                        showTimeoutDialog()
+                                        DialogUtils.showTimeoutDialog(this@LoginActivity)
                                     } else {
-                                        // Handle other failures
                                         Log.e("LoginActivity", "Login failed", t)
-                                        showLoginFailedDialog()
+                                        DialogUtils.showLoginFailedDialog(this@LoginActivity)
                                     }
                                 }
                             })
                     } else {
-                        showNoInternetDialog()
+                        DialogUtils.showNoInternetDialog(this)
                         isLoginInProgress = false
                     }
                 }
@@ -110,61 +100,8 @@ class LoginActivity : AppCompatActivity() {
         return networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
-    private fun showLoadingDialog() {
-        val builder = AlertDialog.Builder(this)
-        val inflater = layoutInflater
-        builder.setView(inflater.inflate(R.layout.dialog_loading, null))
-        builder.setCancelable(false) // Make it not cancellable
-
-        loadingDialog = builder.create()
-        loadingDialog.show()
-    }
-
     private fun hideLoadingDialog() {
-        if (::loadingDialog.isInitialized && loadingDialog.isShowing) {
-            loadingDialog.dismiss()
-        }
+        loadingDialog?.dismiss()
     }
 
-    private fun showLoginFailedDialog() {
-        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_login_fail, null)
-        val customDialog = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .create()
-
-        dialogView.findViewById<Button>(R.id.buttonTryAgain).setOnClickListener {
-            hideLoadingDialog()
-            customDialog.dismiss()
-        }
-
-        customDialog.show()
-    }
-
-    private fun showNoInternetDialog() {
-        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_no_internet, null)
-        val customDialog = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .create()
-
-        dialogView.findViewById<Button>(R.id.buttonTryAgain).setOnClickListener {
-            hideLoadingDialog()
-            customDialog.dismiss()
-        }
-
-        customDialog.show()
-    }
-
-    private fun showTimeoutDialog() {
-        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_timeout, null)
-        val customDialog = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .create()
-
-        dialogView.findViewById<Button>(R.id.buttonTryAgain).setOnClickListener {
-            hideLoadingDialog()
-            customDialog.dismiss()
-        }
-
-        customDialog.show()
-    }
 }

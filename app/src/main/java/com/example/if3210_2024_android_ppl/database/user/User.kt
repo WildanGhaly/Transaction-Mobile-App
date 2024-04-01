@@ -10,6 +10,5 @@ import androidx.room.PrimaryKey
 data class User(
     @PrimaryKey(autoGenerate = true) val id: Int? = null,
     @ColumnInfo(name = "email") val email: String?,
-    @ColumnInfo(name = "token") val token: String?,
     @ColumnInfo(name = "isActive") val isActive: Boolean? = true
 )
