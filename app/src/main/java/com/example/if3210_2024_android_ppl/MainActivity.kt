@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.content.BroadcastReceiver
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
@@ -37,9 +38,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val filter = IntentFilter("com.example.ACTION_SESSION_EXPIRED")
-//        registerReceiver(sessionExpiredReceiver, filter)
-//
-//        startService(Intent(this, TokenCheckService::class.java))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            registerReceiver(sessionExpiredReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(sessionExpiredReceiver, filter)
+        }
+        startService(Intent(this, TokenCheckService::class.java))
 
         val networkManager = NetworkManager(this)
         networkManager.observe(this){
@@ -55,27 +59,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val navView: BottomNavigationView = binding.navView
-
-        val keystoreHelper = KeystoreHelper(this@MainActivity)
-        val token = keystoreHelper.getToken()
-        val authorizationHeaderValue = "Bearer $token"
-        val call: Call<TokenResponse> = RetrofitInstance.api.token(authorizationHeaderValue)
-        call.enqueue(object : Callback<TokenResponse> {
-            override fun onResponse(call: Call<TokenResponse>, response: Response<TokenResponse>) {
-                if (response.isSuccessful) {
-                    val tokenResponse = response.body()
-                    if (tokenResponse != null) {
-                        Log.d("Main", tokenResponse.nim)
-                    }
-                } else {
-                    // Handle request errors
-                }
-            }
-
-            override fun onFailure(call: Call<TokenResponse>, t: Throwable) {
-                // Handle failure, such as a network error
-            }
-        })
 
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         // Passing each menu ID as a set of Ids because each
