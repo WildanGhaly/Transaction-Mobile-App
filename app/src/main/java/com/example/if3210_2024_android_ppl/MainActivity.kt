@@ -3,15 +3,17 @@ package com.example.if3210_2024_android_ppl
 import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Bundle
-import android.app.AlertDialog
+
 import android.content.BroadcastReceiver
 import android.content.Intent
 import android.content.IntentFilter
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
+import androidx.appcompat.app.AlertDialog
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -30,13 +32,24 @@ import retrofit2.Response
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var networkReceiver: BroadcastReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val filter = IntentFilter("com.example.ACTION_SESSION_EXPIRED")
-        registerReceiver(sessionExpiredReceiver, filter)
+//        registerReceiver(sessionExpiredReceiver, filter)
+//
+//        startService(Intent(this, TokenCheckService::class.java))
 
-        startService(Intent(this, TokenCheckService::class.java))
+        val networkManager = NetworkManager(this)
+        networkManager.observe(this){
+            if(it){
+                Log.d("Network", "Connected")
+            }else{
+                Log.d("Network", "Disconnected")
+                showNetworkErrorDialog()
+            }
+        }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -76,10 +89,17 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
         // Check network status and show dialog if network is not available
-        if (!isNetworkAvailable()) {
-            showNetworkErrorDialog()
+        // Register BroadcastReceiver for network changes
+        networkReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (!isNetworkAvailable()) {
+                    showNetworkErrorDialog()
+                }
+            }
         }
+        ContextCompat.registerReceiver(this,networkReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION), ContextCompat.RECEIVER_NOT_EXPORTED)
     }
+
 
     private val sessionExpiredReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
