@@ -6,9 +6,9 @@ import android.net.Uri
 import android.widget.Toast
 
 class EmailSender(private val context: Context) {
-    fun sendEmailWithAttachment(email: String, subject: String, body: String, fileUri: Uri) {
+    fun sendEmailWithAttachment(email: String, subject: String, body: String, fileUri: Uri, mimeType: String) {
         val emailIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "application/vnd.ms-excel"
+            type = mimeType
             putExtra(Intent.EXTRA_EMAIL, arrayOf(email))
             putExtra(Intent.EXTRA_SUBJECT, subject)
             putExtra(Intent.EXTRA_TEXT, body)
@@ -23,3 +23,4 @@ class EmailSender(private val context: Context) {
         }
     }
 }
+

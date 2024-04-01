@@ -50,20 +50,27 @@ class SettingFragment : Fragment() {
         return root
     }
 
-    private fun sendReport(transactions: List<Transaction>) {
+    private fun sendReport(transactions: List<Transaction>, useXlsxFormat: Boolean) {
         context?.let { ctx ->
             val excelFileCreator = ExcelFileCreator(ctx)
             val emailSender = EmailSender(ctx)
 
-            val fileUri = excelFileCreator.createExcelFile(transactions)
+            val fileUri = excelFileCreator.createExcelFile(transactions, useXlsxFormat)
+            val mimeType = if (useXlsxFormat) {
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            } else {
+                "application/vnd.ms-excel"
+            }
             emailSender.sendEmailWithAttachment(
                 "dummy@example.com",
                 "Transaction Report",
                 "Here is your transaction report.",
-                fileUri
+                fileUri,
+                mimeType
             )
         }
     }
+
 
     private fun setupButtonListeners() {
         binding.buttonSendTransaction.setOnClickListener {
@@ -74,7 +81,8 @@ class SettingFragment : Fragment() {
 
                     // TODO: getTransactions()
                     val transaction = listOf<Transaction>()
-                    sendReport(transaction)
+                    val isXlsxFormat = binding.switchXlsXlsx.isChecked // xlsx true, else false
+                    sendReport(transaction, isXlsxFormat)
 
                 } else {
                     Log.e("SettingFragment", "Failed to retrieve active user's email")
@@ -87,11 +95,17 @@ class SettingFragment : Fragment() {
         binding.buttonSaveTransaction.setOnClickListener {
             // TODO: Handle save transaction button click
             val transactions = listOf<Transaction>()
+            val isXlsxFormat = binding.switchXlsXlsx.isChecked // xlsx true, else false
             context?.let { ctx ->
                 val excelFileCreator = ExcelFileCreator(ctx)
-                val fileUri = excelFileCreator.createExcelFile(transactions)
+                val fileUri = excelFileCreator.createExcelFile(transactions, isXlsxFormat)
+                val mimeType = if (isXlsxFormat) {
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            } else {
+                "application/vnd.ms-excel"
+            }
                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                    type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    type = mimeType
                     putExtra(Intent.EXTRA_STREAM, fileUri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
