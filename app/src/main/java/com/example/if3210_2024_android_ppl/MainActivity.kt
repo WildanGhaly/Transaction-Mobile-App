@@ -37,9 +37,19 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val filter = IntentFilter("com.example.ACTION_SESSION_EXPIRED")
-        registerReceiver(sessionExpiredReceiver, filter)
+//        registerReceiver(sessionExpiredReceiver, filter)
+//
+//        startService(Intent(this, TokenCheckService::class.java))
 
-        startService(Intent(this, TokenCheckService::class.java))
+        val networkManager = NetworkManager(this)
+        networkManager.observe(this){
+            if(it){
+                Log.d("Network", "Connected")
+            }else{
+                Log.d("Network", "Disconnected")
+                showNetworkErrorDialog()
+            }
+        }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
