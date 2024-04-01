@@ -131,7 +131,6 @@ class ScanFragment : Fragment() {
                 // Permission granted, open gallery
                 selectImageFromGallery()
 
-
             }
         initCamera()
 
@@ -232,6 +231,7 @@ class ScanFragment : Fragment() {
         val rotatedBitmap = rotateBitmap(bitmapImage)
 
         imagePreview.setImageBitmap(rotatedBitmap)
+//        imagePreview.setImageBitmap(bitmapImage)
 
         // Adjusting the image view's scale type to fit the entire image within the view
         imagePreview.scaleType = ImageView.ScaleType.FIT_CENTER
