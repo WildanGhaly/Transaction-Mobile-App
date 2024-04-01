@@ -1,5 +1,6 @@
 package com.example.if3210_2024_android_ppl
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -25,6 +26,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        startService(Intent(this, TokenCheckService::class.java))
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

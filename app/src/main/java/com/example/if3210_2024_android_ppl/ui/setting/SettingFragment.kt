@@ -13,6 +13,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.if3210_2024_android_ppl.LoginActivity
+import com.example.if3210_2024_android_ppl.TokenCheckService
 import com.example.if3210_2024_android_ppl.database.transaction.Transaction
 import com.example.if3210_2024_android_ppl.database.user.UserViewModel
 import com.example.if3210_2024_android_ppl.databinding.FragmentSettingBinding
@@ -100,6 +101,7 @@ class SettingFragment : Fragment() {
 
         binding.buttonBelow.setOnClickListener {
             // TODO: Handle logout button click
+            activity?.stopService(Intent(context, TokenCheckService::class.java))
             lifecycleScope.launch {
                 withContext(Dispatchers.IO) {
                     userViewModel.logout()
