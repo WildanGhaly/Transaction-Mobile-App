@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.content.BroadcastReceiver
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
@@ -37,9 +38,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val filter = IntentFilter("com.example.ACTION_SESSION_EXPIRED")
-//        registerReceiver(sessionExpiredReceiver, filter)
-//
-//        startService(Intent(this, TokenCheckService::class.java))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            registerReceiver(sessionExpiredReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(sessionExpiredReceiver, filter)
+        }
+        startService(Intent(this, TokenCheckService::class.java))
 
         val networkManager = NetworkManager(this)
         networkManager.observe(this){
