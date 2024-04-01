@@ -1,11 +1,12 @@
 package com.example.if3210_2024_android_ppl
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.os.Bundle
 import android.app.AlertDialog
 import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
@@ -74,6 +75,10 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
+        // Check network status and show dialog if network is not available
+        if (!isNetworkAvailable()) {
+            showNetworkErrorDialog()
+        }
     }
 
     private val sessionExpiredReceiver = object : BroadcastReceiver() {
@@ -100,5 +105,20 @@ class MainActivity : AppCompatActivity() {
         }
 
         customDialog.show()
+    }
+
+    private fun isNetworkAvailable(): Boolean {
+        val connectivityManager =
+            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetworkInfo = connectivityManager.activeNetworkInfo
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected
+    }
+
+    private fun showNetworkErrorDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Network Error")
+            .setMessage("No internet connection available. Please check your network settings.")
+            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+            .show()
     }
 }
