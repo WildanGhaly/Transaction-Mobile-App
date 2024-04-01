@@ -15,10 +15,12 @@ import androidx.lifecycle.lifecycleScope
 import com.example.if3210_2024_android_ppl.LoginActivity
 import com.example.if3210_2024_android_ppl.TokenCheckService
 import com.example.if3210_2024_android_ppl.database.transaction.Transaction
+import com.example.if3210_2024_android_ppl.database.transaction.TransactionDatabase
 import com.example.if3210_2024_android_ppl.database.user.UserViewModel
 import com.example.if3210_2024_android_ppl.databinding.FragmentSettingBinding
 import com.example.if3210_2024_android_ppl.util.EmailSender
 import com.example.if3210_2024_android_ppl.util.ExcelFileCreator
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,6 +29,7 @@ class SettingFragment : Fragment() {
 
     private var _binding: FragmentSettingBinding? = null
     private lateinit var userViewModel: UserViewModel
+    private val db by lazy { TransactionDatabase(requireContext()) }
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -83,10 +86,12 @@ class SettingFragment : Fragment() {
                     Log.d("SettingFragment", "Active user's email: $email")
 
                     // TODO: getTransactions()
-                    val transaction = listOf<Transaction>()
-                    val isXlsxFormat = binding.switchXlsXlsx.isChecked // xlsx true, else false
-                    sendReport(transaction, isXlsxFormat)
-
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val transactions = db.transactionDao().getTransactions()
+                        val isXlsxFormat = binding.switchXlsXlsx.isChecked // xlsx true, else false
+                        sendReport(transactions, isXlsxFormat)
+                        Log.d("IsiTransaksi", transactions.toString())
+                    }
                 } else {
                     Log.e("SettingFragment", "Failed to retrieve active user's email")
                 }
@@ -97,22 +102,24 @@ class SettingFragment : Fragment() {
 
         binding.buttonSaveTransaction.setOnClickListener {
             // TODO: Handle save transaction button click
-            val transactions = listOf<Transaction>()
-            val isXlsxFormat = binding.switchXlsXlsx.isChecked // xlsx true, else false
-            context?.let { ctx ->
-                val excelFileCreator = ExcelFileCreator(ctx)
-                val fileUri = excelFileCreator.createExcelFile(transactions, isXlsxFormat)
-                val mimeType = if (isXlsxFormat) {
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            } else {
-                "application/vnd.ms-excel"
-            }
-                val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                    type = mimeType
-                    putExtra(Intent.EXTRA_STREAM, fileUri)
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            CoroutineScope(Dispatchers.IO).launch {
+                val transactions = db.transactionDao().getTransactions()
+                val isXlsxFormat = binding.switchXlsXlsx.isChecked // xlsx true, else false
+                context?.let { ctx ->
+                    val excelFileCreator = ExcelFileCreator(ctx)
+                    val fileUri = excelFileCreator.createExcelFile(transactions, isXlsxFormat)
+                    val mimeType = if (isXlsxFormat) {
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    } else {
+                        "application/vnd.ms-excel"
+                    }
+                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = mimeType
+                        putExtra(Intent.EXTRA_STREAM, fileUri)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    startActivity(Intent.createChooser(shareIntent, "Share Excel File"))
                 }
-                startActivity(Intent.createChooser(shareIntent, "Share Excel File"))
             }
         }
 
