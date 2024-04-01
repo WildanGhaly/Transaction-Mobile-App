@@ -82,5 +82,7 @@ dependencies {
     implementation("org.apache.poi:poi-ooxml:5.2.5")
     implementation ("com.google.android.gms:play-services-location:18.0.0")
     implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation ("androidx.activity:activity-compose:1.8.2")
+    implementation ("io.coil-kt:coil-compose:2.1.0")
 
 }

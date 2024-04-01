@@ -28,6 +28,8 @@ import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -47,6 +49,15 @@ import java.util.Locale
 class ScanFragment : Fragment() {
 
     private var _binding: FragmentScanBinding? = null
+
+//    private val singlePhotoPicker = rememberLauncherForActivityResult(
+//        contract = ActivityResultContracts.PickVisualMedia(),
+//        onResult = { uri: Uri? ->
+//            if (uri != null) {
+//                pickedPhoto = uri
+//            }
+//        }
+//    )
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -71,6 +82,16 @@ class ScanFragment : Fragment() {
     private val cameraProviderFuture: ListenableFuture<ProcessCameraProvider> by lazy {
         ProcessCameraProvider.getInstance(requireContext())
     }
+
+    private val galleryLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val selectedImageUri: Uri? = result.data?.data
+                // Do something with the selected image URI
+                // For example, display it in an ImageView
+                loadSelectedImage(selectedImageUri)
+            }
+        }
 
 
     override fun onCreateView(
@@ -129,7 +150,7 @@ class ScanFragment : Fragment() {
             Toast.makeText(context, "Picture Clicked", Toast.LENGTH_SHORT).show()
 
                 // Permission granted, open gallery
-                selectImageFromGallery()
+            openGallery()
 
             }
         initCamera()
@@ -137,24 +158,30 @@ class ScanFragment : Fragment() {
         return root
     }
 
-    private fun selectImageFromGallery() {
-        // Check if permission to read external storage is granted
-        if (ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // Request permission if not granted
-            ActivityCompat.requestPermissions(
-                requireActivity(),
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                READ_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE
-            )
-        } else {
-            // Permission granted, open gallery
-            val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-            startActivityForResult(galleryIntent, GALLERY_REQUEST_CODE)
-        }
+//    private fun selectImageFromGallery() {
+//        // Check if permission to read external storage is granted
+//        if (ContextCompat.checkSelfPermission(
+//                requireContext(),
+//                Manifest.permission.READ_EXTERNAL_STORAGE
+//            ) != PackageManager.PERMISSION_GRANTED
+//        ) {
+//            // Request permission if not granted
+//            ActivityCompat.requestPermissions(
+//                requireActivity(),
+//                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+//                READ_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE
+//            )
+//        } else {
+//            // Permission granted, open gallery
+//            val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+//            startActivityForResult(galleryIntent, GALLERY_REQUEST_CODE)
+//        }
+//    }
+
+    private fun openGallery() {
+        val photoPickerIntent = Intent(Intent.ACTION_PICK)
+        photoPickerIntent.type = "image/*"
+        galleryLauncher.launch(photoPickerIntent)
     }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -172,9 +199,10 @@ class ScanFragment : Fragment() {
             try {
                 val source = ImageDecoder.createSource(requireContext().contentResolver, pickedPhoto)
                 val pickedBitmap = ImageDecoder.decodeBitmap(source)
+                val rotated = rotateBitmapfile(pickedBitmap)
 
                 // Show image preview dialog with the picked bitmap
-                pickedBitmap?.let { bitmap ->
+                rotated?.let { bitmap ->
                     showImagePreviewDialog(bitmap)
                 }
             } catch (e: IOException) {
@@ -257,6 +285,14 @@ class ScanFragment : Fragment() {
         rotationMatrix.postRotate(90f)
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, rotationMatrix, true)
     }
+
+    private fun rotateBitmapfile(bitmap: Bitmap): Bitmap {
+        val rotationMatrix = Matrix()
+        rotationMatrix.postRotate(270f)
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, rotationMatrix, true)
+    }
+
+
 
 
 
