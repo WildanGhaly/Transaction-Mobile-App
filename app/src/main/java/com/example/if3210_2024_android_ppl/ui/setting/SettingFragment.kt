@@ -61,13 +61,16 @@ class SettingFragment : Fragment() {
             } else {
                 "application/vnd.ms-excel"
             }
-            emailSender.sendEmailWithAttachment(
-                "dummy@example.com",
-                "Transaction Report",
-                "Here is your transaction report.",
-                fileUri,
-                mimeType
-            )
+
+            userViewModel.getActiveUserEmail { email ->
+                emailSender.sendEmailWithAttachment(
+                    email?: "13521015@std.stei.itb.ac.id",
+                    "Transaction Report",
+                    "Here is your transaction report.",
+                    fileUri,
+                    mimeType
+                )
+            }
         }
     }
 
