@@ -22,4 +22,21 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <string name="loading">Loading...</string>
+    <string name="send_transaction">Send\nTransaction</string>
+    <string name="save_transaction">Save\nTransaction</string>
+    <string name="logout">Logout</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="add_button">add_button</string>
+    <string name="title">Title</string>
+    <string name="insert_title">Insert Title</string>
+    <string name="price">Price</string>
+    <string name="insert_price">Insert Price</string>
+    <string name="category">Category</string>
+    <string name="select">Select Item</string>
+    <string name="insert_location">Insert Location</string>
+    <string name="button_save">Save</string>
+    <string name="location">Location</string>
+    <string name="title_add_transaction">Add Transaction</string>
+    <string name="show_location">Show Location</string>
 </resources>

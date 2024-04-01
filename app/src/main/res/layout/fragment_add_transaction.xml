@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="30dp"
+        android:layout_marginTop="20dp">
+
+        <!-- Title Field -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/title_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title"
+                android:textFontWeight="600"
+                android:textSize="18sp"
+                android:layout_marginStart="0dp"
+                android:textColor="@android:color/black"/>
+
+            <EditText
+                android:id="@+id/addTextTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/login_input_field"
+                android:padding="15dp"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:hint="@string/insert_title"
+                android:autofillHints="" />
+
+        </LinearLayout>
+
+        <!-- Price Field -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/price_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/price"
+                android:textFontWeight="600"
+                android:textSize="18sp"
+                android:layout_marginStart="0dp"
+                android:textColor="@android:color/black"/>
+
+            <EditText
+                android:id="@+id/addPrice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/login_input_field"
+                android:padding="15dp"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:hint="@string/insert_price"
+                android:autofillHints=""
+                android:inputType="number"/>
+
+        </LinearLayout>
+
+        <!-- Category Field -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/category_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/category"
+                android:textFontWeight="600"
+                android:textSize="18sp"
+                android:layout_marginStart="0dp"
+                android:textColor="@android:color/black"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu">
+
+                <AutoCompleteTextView
+                    android:id="@+id/addCategory"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/login_input_field"
+                    android:padding="15dp"
+                    android:textSize="18sp"
+                    android:textColor="@android:color/black"
+                    android:inputType="none"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+
+        <!-- Location Field -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/location_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/location"
+                android:textFontWeight="600"
+                android:textSize="18sp"
+                android:layout_marginStart="0dp"
+                android:textColor="@android:color/black"/>
+
+            <EditText
+                android:id="@+id/addLocation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/login_input_field"
+                android:padding="15dp"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:hint="@string/insert_location"
+                android:autofillHints="" />
+
+        </LinearLayout>
+        <Button
+            android:id="@+id/buttonSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_save"
+            android:textSize="18sp"
+            android:textFontWeight="700"
+            android:textColor="@android:color/white"
+            android:background="@drawable/rounded_button"
+            android:paddingStart="40dp"
+            android:paddingEnd="40dp"
+            android:layout_marginTop="20dp" />
+    </LinearLayout>
+
+</RelativeLayout>
