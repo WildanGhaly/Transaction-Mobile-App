@@ -57,6 +57,7 @@ class TokenCheckService : Service() {
 
             override fun onFailure(call: Call<TokenResponse>, t: Throwable) {
                 Log.d("TokenCheckService", "Failed to validate token: ${t.message}")
+                handleExpiredToken()
             }
         })
     }

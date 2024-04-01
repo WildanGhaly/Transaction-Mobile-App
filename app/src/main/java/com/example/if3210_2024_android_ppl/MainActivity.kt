@@ -60,27 +60,6 @@ class MainActivity : AppCompatActivity() {
 
         val navView: BottomNavigationView = binding.navView
 
-        val keystoreHelper = KeystoreHelper(this@MainActivity)
-        val token = keystoreHelper.getToken()
-        val authorizationHeaderValue = "Bearer $token"
-        val call: Call<TokenResponse> = RetrofitInstance.api.token(authorizationHeaderValue)
-        call.enqueue(object : Callback<TokenResponse> {
-            override fun onResponse(call: Call<TokenResponse>, response: Response<TokenResponse>) {
-                if (response.isSuccessful) {
-                    val tokenResponse = response.body()
-                    if (tokenResponse != null) {
-                        Log.d("Main", tokenResponse.nim)
-                    }
-                } else {
-                    // Handle request errors
-                }
-            }
-
-            override fun onFailure(call: Call<TokenResponse>, t: Throwable) {
-                // Handle failure, such as a network error
-            }
-        })
-
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
