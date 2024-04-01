@@ -1,8 +1,14 @@
 package com.example.if3210_2024_android_ppl
 
+import android.app.AlertDialog
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
+import android.widget.Button
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -26,6 +32,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val filter = IntentFilter("com.example.ACTION_SESSION_EXPIRED")
+        registerReceiver(sessionExpiredReceiver, filter)
 
         startService(Intent(this, TokenCheckService::class.java))
 
@@ -65,5 +73,32 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+    }
+
+    private val sessionExpiredReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            showSessionExpireDialog()
+        }
+    }
+
+    private fun showSessionExpireDialog() {
+        stopService(Intent(this, TokenCheckService::class.java))
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_session_expire, null)
+        val customDialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        dialogView.findViewById<Button>(R.id.buttonTryAgain).setOnClickListener {
+            val loginIntent = Intent(this, LoginActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            startActivity(loginIntent)
+
+            customDialog.dismiss()
+        }
+
+        customDialog.show()
     }
 }

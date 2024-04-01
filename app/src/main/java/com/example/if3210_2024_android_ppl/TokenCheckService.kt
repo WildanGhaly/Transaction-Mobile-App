@@ -1,11 +1,14 @@
 package com.example.if3210_2024_android_ppl
 
+import android.app.AlertDialog
 import android.app.Service
 import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import android.view.LayoutInflater
+import android.widget.Button
 import com.example.if3210_2024_android_ppl.api.KeystoreHelper
 import com.example.if3210_2024_android_ppl.api.RetrofitInstance
 import com.example.if3210_2024_android_ppl.api.TokenResponse
@@ -59,11 +62,15 @@ class TokenCheckService : Service() {
     }
 
     private fun handleExpiredToken() {
-        Log.d("TokenCheckService", "Handling expired token.")
+        val intent = Intent("com.example.ACTION_SESSION_EXPIRED")
+        sendBroadcast(intent)
     }
 
     override fun onDestroy() {
-        handler.removeCallbacks(runnable)
+        if(::runnable.isInitialized) {
+            handler.removeCallbacks(runnable)
+        }
         super.onDestroy()
     }
+
 }
