@@ -1,5 +1,6 @@
 package com.example.if3210_2024_android_ppl.ui.transaction
 
+import android.net.Uri
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -68,7 +69,20 @@ class TransactionFragment : Fragment() {
                 navController.navigate(R.id.navigation_editTransaction, bundle)
 
             }
+            override fun onDelete(transaction: Transaction) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    db.transactionDao().deleteTransaction(transaction)
+                    loadData()
+                }
+            }
 
+            override fun showLocation(transaction: Transaction) {
+                val location = transaction.location
+                val gmmIntentUri = Uri.parse("geo:0,0?q=$location")
+                val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+                mapIntent.setPackage("com.google.android.apps.maps")
+                startActivity(mapIntent)
+            }
         })
         val list_transaction: RecyclerView = binding.listTransaction
         list_transaction.apply {
@@ -80,6 +94,10 @@ class TransactionFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+        loadData()
+    }
+
+    fun loadData() {
         CoroutineScope(Dispatchers.IO).launch {
             val transactionList = db.transactionDao().getTransactions()
             Log.d("MainActivity","dbResponse: $transactionList")
@@ -87,10 +105,6 @@ class TransactionFragment : Fragment() {
                 transactionAdapter.setData(transactionList)
             }
         }
-    }
-
-    fun intentEdit() {
-
     }
 
     override fun onDestroyView() {

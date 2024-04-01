@@ -3,8 +3,10 @@ package com.example.if3210_2024_android_ppl.database.transaction
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Button
 import androidx.recyclerview.widget.RecyclerView
 import com.example.if3210_2024_android_ppl.R
 
@@ -31,7 +33,15 @@ class TransactionAdapter (private val transactions: ArrayList<Transaction>, priv
         holder.view.findViewById<LinearLayout>(R.id.transaction_container).setOnClickListener{
             listener.onClick(transaction)
         }
+        holder.view.findViewById<ImageButton>(R.id.icon_delete).setOnClickListener {
+            listener.onDelete(transaction)
+        }
+        holder.view.findViewById<Button>(R.id.buttonShowLocation).setOnClickListener {
+            listener.showLocation(transaction)
+        }
     }
+
+
 
     fun setData(transactionList: List<Transaction>) {
         transactions.clear()
@@ -41,5 +51,7 @@ class TransactionAdapter (private val transactions: ArrayList<Transaction>, priv
 
     interface OnAdapterListener {
         fun onClick(transaction: Transaction)
+        fun onDelete(transaction: Transaction)
+        fun showLocation(transaction: Transaction)
     }
 }
