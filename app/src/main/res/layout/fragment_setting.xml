@@ -14,8 +14,41 @@
         android:orientation="vertical"
         android:layout_marginTop="18dp">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="18dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:textFontWeight="600"
+                android:text="*xls" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchXlsXlsx"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:textFontWeight="600"
+                android:text="*xlsx" />
+        </LinearLayout>
+
+
         <Button
             android:id="@+id/buttonSendTransaction"
+            android:layout_marginTop="16dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/send_transaction"
@@ -36,6 +69,19 @@
             android:drawableEnd="@drawable/ic_save"
             android:background="@drawable/button_rounded_border"
             android:textColor="@color/black"/>
+
+        <Button
+            android:id="@+id/buttonRandomizeTransaction"
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/randomize_transaction"
+            android:textFontWeight="600"
+            android:gravity="start|center_vertical"
+            android:drawableEnd="@drawable/ic_shuffle"
+            android:background="@drawable/button_rounded_border"
+            android:textColor="@color/black"/>
+
     </LinearLayout>
 
     <Button
