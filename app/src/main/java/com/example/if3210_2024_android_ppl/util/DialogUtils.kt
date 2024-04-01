@@ -3,6 +3,7 @@ package com.example.if3210_2024_android_ppl.util
 import android.content.Context
 import android.view.LayoutInflater
 import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import com.example.if3210_2024_android_ppl.R
 
@@ -49,4 +50,20 @@ object DialogUtils {
             dialog.dismiss()
         }
     }
+
+    fun showFileSavedDialog(context: Context) {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_file_saved, null)
+        val fileSavedTextView = dialogView.findViewById<TextView>(R.id.textViewFileSaved)
+
+        val dialog = AlertDialog.Builder(context)
+            .setView(dialogView)
+            .create()
+
+        dialogView.findViewById<Button>(R.id.buttonTryAgain).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
 }

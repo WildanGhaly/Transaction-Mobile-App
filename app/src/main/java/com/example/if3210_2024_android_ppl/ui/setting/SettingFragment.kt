@@ -1,7 +1,12 @@
 package com.example.if3210_2024_android_ppl.ui.setting
 
+import android.content.ContentValues
 import android.content.Intent
+import android.media.MediaScannerConnection
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -27,6 +32,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeoutOrNull
+import java.io.File
 
 class SettingFragment : Fragment() {
 
@@ -124,34 +130,22 @@ class SettingFragment : Fragment() {
                 val dialog = DialogUtils.showLoadingDialog(requireContext())
                 lifecycleScope.launch {
                     try {
-                        val job = withTimeoutOrNull(10000) {
-                            CoroutineScope(Dispatchers.IO).launch {
-                                val transactions = db.transactionDao().getTransactions()
-                                val isXlsxFormat = binding.switchXlsXlsx.isChecked
-                                context?.let { ctx ->
-                                    val excelFileCreator = ExcelFileCreator(ctx)
-                                    val fileUri = excelFileCreator.createExcelFile(transactions, isXlsxFormat)
-                                    val mimeType = if (isXlsxFormat) {
-                                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                                    } else {
-                                        "application/vnd.ms-excel"
-                                    }
-                                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                        type = mimeType
-                                        putExtra(Intent.EXTRA_STREAM, fileUri)
-                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                    }
-                                    withContext(Dispatchers.Main) {
-                                        startActivity(Intent.createChooser(shareIntent, "Share Excel File"))
-                                    }
-                                }
-                            }
+                        val transactions = db.transactionDao().getTransactions()
+                        val isXlsxFormat = binding.switchXlsXlsx.isChecked
+                        val fileName = "Transactions_${System.currentTimeMillis()}" + if (isXlsxFormat) ".xlsx" else ".xls"
+                        val mimeType = if (isXlsxFormat) {
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        } else {
+                            "application/vnd.ms-excel"
                         }
-                        if (job == null) {
-                            DialogUtils.showTimeoutDialog(requireContext())
+                        val excelFileCreator = ExcelFileCreator(requireContext())
+                        val fileUri = excelFileCreator.createExcelFile(transactions, isXlsxFormat)
+
+                        val savedFilePath = saveFileToExternalStorage(fileName, mimeType, fileUri)
+                        Log.d("SettingFragment", savedFilePath.toString())
+                        withContext(Dispatchers.Main) {
+                            DialogUtils.showFileSavedDialog(requireContext())
                         }
-                    } catch (e: TimeoutCancellationException) {
-                        DialogUtils.showTimeoutDialog(requireContext())
                     } finally {
                         dialog.dismiss()
                         isSaveOperationInProgress = false
@@ -159,7 +153,6 @@ class SettingFragment : Fragment() {
                 }
             }
         }
-
 
         binding.buttonBelow.setOnClickListener {
             if (!isLogoutOperationInProgress) {
@@ -185,12 +178,28 @@ class SettingFragment : Fragment() {
             }
         }
 
-
         binding.buttonRandomizeTransaction.setOnClickListener {
             // TODO: RANDOMIZE TRANSACTION HERE
             // TODO: RANDOMIZE TRANSACTION HERE
             // TODO: RANDOMIZE TRANSACTION HERE
 
+        }
+    }
+
+    private fun saveFileToExternalStorage(fileName: String, mimeType: String, fileUri: Uri) {
+        val values = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+        }
+
+        val resolver = requireContext().contentResolver
+        val uri = resolver.insert(MediaStore.Files.getContentUri("external"), values)
+        uri?.let {
+            resolver.openOutputStream(it).use { outputStream ->
+                val inputStream = resolver.openInputStream(fileUri)
+                inputStream?.copyTo(outputStream!!)
+            }
         }
     }
 
