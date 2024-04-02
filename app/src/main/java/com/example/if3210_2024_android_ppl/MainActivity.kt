@@ -1,13 +1,13 @@
 package com.example.if3210_2024_android_ppl
 
 import android.content.Context
-import android.net.ConnectivityManager
-import android.os.Bundle
-
-import android.content.BroadcastReceiver
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
+import android.content.res.Configuration
+import android.net.ConnectivityManager
+import android.os.Bundle
+import android.content.BroadcastReceiver
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
@@ -26,6 +26,9 @@ import com.example.if3210_2024_android_ppl.api.TokenResponse
 import com.example.if3210_2024_android_ppl.database.user.User
 import com.example.if3210_2024_android_ppl.database.user.UserViewModel
 import com.example.if3210_2024_android_ppl.databinding.ActivityMainBinding
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
+import android.view.ViewGroup
+import com.google.android.material.navigationrail.NavigationRailView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -46,10 +49,10 @@ class MainActivity : AppCompatActivity() {
         startService(Intent(this, TokenCheckService::class.java))
 
         val networkManager = NetworkManager(this)
-        networkManager.observe(this){
-            if(it){
+        networkManager.observe(this) {
+            if (it) {
                 Log.d("Network", "Connected")
-            }else{
+            } else {
                 Log.d("Network", "Disconnected")
                 showNetworkErrorDialog()
             }
@@ -58,7 +61,16 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val navView: BottomNavigationView = binding.navView
+        val navView = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            binding.navView as NavigationRailView
+        } else {
+            binding.navView as BottomNavigationView
+        }
+
+//        binding = ActivityMainBinding.inflate(layoutInflater)
+//        setContentView(binding.root)
+//
+//        val navView: BottomNavigationView = binding.navView
 
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         // Passing each menu ID as a set of Ids because each
@@ -69,7 +81,7 @@ class MainActivity : AppCompatActivity() {
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
+        navView?.setupWithNavController(navController)
 
         // Check network status and show dialog if network is not available
         // Register BroadcastReceiver for network changes
