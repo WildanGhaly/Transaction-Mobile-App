@@ -4,6 +4,7 @@ import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,20 +16,24 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.ViewModelProvider
 import com.example.if3210_2024_android_ppl.R
 import com.example.if3210_2024_android_ppl.database.transaction.Transaction
 import com.example.if3210_2024_android_ppl.database.transaction.TransactionDatabase
+import com.example.if3210_2024_android_ppl.database.user.UserViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.util.*
 
 class AddTransactionFragment : Fragment() {
 
     private val db by lazy { TransactionDatabase(requireContext()) }
+    private lateinit var userViewModel: UserViewModel
     private var transactionId: Int = 0
     private val listItem = arrayOf(
         "Pembelian", "Pemasukan"
@@ -65,6 +70,8 @@ class AddTransactionFragment : Fragment() {
             populateTransactionDetails(transactionId)
         }
 
+        userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
+
         return view
     }
     private fun setupListener(view: View) {
@@ -92,9 +99,11 @@ class AddTransactionFragment : Fragment() {
                 if (addresses?.isNotEmpty() == true) {
                     val address = addresses[0]
                     val locationName = address.getAddressLine(0)
+                    val latitude = location.latitude
+                    val longitude = location.longitude
                     Toast.makeText(requireContext(), locationName, Toast.LENGTH_SHORT).show()
                     // Update the locationText with coordinates
-                    view?.findViewById<EditText>(R.id.addLocation)?.setText("$locationName")
+                    view?.findViewById<EditText>(R.id.addLocation)?.setText("$locationName ($latitude, $longitude)")
                 } else {
                     Toast.makeText(requireContext(), "Unknown Location", Toast.LENGTH_SHORT).show()
                 }
@@ -127,40 +136,65 @@ class AddTransactionFragment : Fragment() {
         val categoryText = view.findViewById<AutoCompleteTextView>(R.id.addCategory).text.toString()
         val currentDate = LocalDate.now().toString()
 
-        if (titleText.isNotEmpty()) {
-            // Check if transactionId is provided via arguments for editing
-            val transactionId = arguments?.getInt("transactionId", 0)
-            if (transactionId != null && transactionId != 0) {
-                // If transactionId is provided and not 0, update the existing transaction
-                CoroutineScope(Dispatchers.IO).launch {
-                    db.transactionDao().updateTransaction(
-                        Transaction(
-                            transactionId,
-                            0, // You may need to pass the user ID or any other relevant ID here
-                            titleText,
-                            priceText,
-                            locationText,
-                            currentDate,
-                            categoryText
+        var locationName: String
+        var latitude: Double = 0.0
+        var longitude: Double = 0.0
+
+        val parts = locationText.split("(")
+        if (parts.size >= 2) {
+            // Extract location name
+            locationName = parts[0].trim()
+
+            // Extract latitude and longitude from the second part
+            val coordinates = parts[1].replace(")", "").split(",")
+            if (coordinates.size >= 2) {
+                latitude = coordinates[0].trim().toDoubleOrNull() ?: 0.0
+                longitude = coordinates[1].trim().toDoubleOrNull() ?: 0.0
+            }
+        } else {
+            locationName = locationText
+            latitude = -6.9274065413170725
+            longitude = 107.76996019357847
+        }
+
+        userViewModel.getActiveUserEmail { email ->
+            if (titleText.isNotEmpty()) {
+                // Check if transactionId is provided via arguments for editing
+                val transactionId = arguments?.getInt("transactionId", 0)
+                if (transactionId != null && transactionId != 0) {
+                    // If transactionId is provided and not 0, update the existing transaction
+                    CoroutineScope(Dispatchers.IO).launch {
+                        db.transactionDao().updateTransaction(
+                            Transaction(
+                                transactionId,
+                                email, // You may need to pass the user ID or any other relevant ID here
+                                titleText,
+                                priceText,
+                                locationName,
+                                currentDate,
+                                categoryText,
+                                latitude,
+                                longitude
+                            )
                         )
-                    )
-                    requireActivity().runOnUiThread {
-                        findNavController().navigateUp()
+                        requireActivity().runOnUiThread {
+                            findNavController().navigateUp()
+                        }
+                    }
+                } else {
+                    // If transactionId is not provided or 0, it means it's for adding a new transaction
+                    CoroutineScope(Dispatchers.IO).launch {
+                        db.transactionDao().addTransaction(
+                            Transaction(0, email, titleText, priceText, locationName, currentDate, categoryText, latitude, longitude)
+                        )
+                        requireActivity().runOnUiThread {
+                            findNavController().navigateUp()
+                        }
                     }
                 }
             } else {
-                // If transactionId is not provided or 0, it means it's for adding a new transaction
-                CoroutineScope(Dispatchers.IO).launch {
-                    db.transactionDao().addTransaction(
-                        Transaction(0, 0, titleText, priceText, locationText, currentDate, categoryText)
-                    )
-                    requireActivity().runOnUiThread {
-                        findNavController().navigateUp()
-                    }
-                }
+                Toast.makeText(requireContext(), "Please enter title", Toast.LENGTH_SHORT).show()
             }
-        } else {
-            Toast.makeText(requireContext(), "Please enter title", Toast.LENGTH_SHORT).show()
         }
     }
 }

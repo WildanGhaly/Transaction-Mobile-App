@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.if3210_2024_android_ppl.databinding.FragmentGraphBinding
 import com.example.if3210_2024_android_ppl.database.transaction.TransactionDatabase
+import com.example.if3210_2024_android_ppl.database.user.UserViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,6 +31,7 @@ class GraphFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val db by lazy { TransactionDatabase(requireContext()) }
+    private lateinit var userViewModel: UserViewModel
     lateinit var pieChart: PieChart
 
     override fun onCreateView(
@@ -48,6 +50,7 @@ class GraphFragment : Fragment() {
 //            textView.text = it
 //        }
 
+        userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
         showPieChart()
 
         return root
@@ -59,62 +62,55 @@ class GraphFragment : Fragment() {
         pieChart.setUsePercentValues(true)
         pieChart.getDescription().setEnabled(false)
         pieChart.setExtraOffsets(5f, 10f, 5f, 5f)
-
         pieChart.setDragDecelerationFrictionCoef(0.95f)
-
         pieChart.setDrawHoleEnabled(true)
         pieChart.setHoleColor(Color.WHITE)
-
-        pieChart.setTransparentCircleColor(Color.WHITE)
-        pieChart.setTransparentCircleAlpha(110)
-
         pieChart.setDrawCenterText(true)
 
         pieChart.setRotationAngle(0f)
-
         pieChart.setRotationEnabled(true)
         pieChart.setHighlightPerTapEnabled(true)
 
         pieChart.animateY(1400, Easing.EaseInOutQuad)
 
-        pieChart.legend.isEnabled = false
+        pieChart.legend.isEnabled = true
         pieChart.setEntryLabelColor(Color.WHITE)
         pieChart.setEntryLabelTextSize(12f)
 
-        // Retrieve data from the database and categorize it
-        // Inside the showPieChart function
-        CoroutineScope(Dispatchers.IO).launch {
-            val transactions = db.transactionDao().getTransactions()
-            val categoryMap = mutableMapOf<String?, Float>()
-            transactions.forEach { transaction ->
-                val category = transaction.category
-                val price = transaction.price?.toFloat() ?: 0f // Provide a default value if price is null
-                categoryMap[category] = categoryMap.getOrDefault(category, 0f) + price
-            }
+        userViewModel.getActiveUserEmail { email ->
+            CoroutineScope(Dispatchers.IO).launch {
+                val transactions = db.transactionDao().getTransactions(email)
+                val categoryMap = mutableMapOf<String?, Float>()
+                transactions.forEach { transaction ->
+                    val category = transaction.category
+                    val price = transaction.price?.toFloat() ?: 0f // Provide a default value if price is null
+                    categoryMap[category] = categoryMap.getOrDefault(category, 0f) + price
+                }
 
-            // Create pie entries
-            val entries = mutableListOf<PieEntry>()
-            categoryMap.forEach { (category, price) ->
-                entries.add(PieEntry(price, category))
-            }
+                // Create pie entries
+                val entries = mutableListOf<PieEntry>()
+                categoryMap.forEach { (category, price) ->
+                    entries.add(PieEntry(price, category))
+                }
 
-            // Create pie data set
-            val dataSet = PieDataSet(entries, "Transactions")
-            dataSet.colors = mutableListOf(
-                Color.parseColor("#FFBE8046"),
-                Color.parseColor("#FF751615")
-            )
+                // Create pie data set
+                val dataSet = PieDataSet(entries, "Transactions")
+                dataSet.colors = mutableListOf(
+                    Color.parseColor("#FFBE8046"),
+                    Color.parseColor("#FF751615")
+                )
 
-            // Create pie data
-            val data = PieData(dataSet)
-            data.setValueTextSize(12f)
-            data.setValueTextColor(Color.WHITE)
-            data.setValueFormatter(PercentFormatter(pieChart))
+                // Create pie data
+                val data = PieData(dataSet)
+                data.setValueTextSize(12f)
+                data.setValueTextColor(Color.WHITE)
+                data.setValueFormatter(PercentFormatter(pieChart))
 
-            // Update the UI on the main thread
-            launch(Dispatchers.Main) {
-                pieChart.data = data
-                pieChart.invalidate()
+                // Update the UI on the main thread
+                launch(Dispatchers.Main) {
+                    pieChart.data = data
+                    pieChart.invalidate()
+                }
             }
         }
     }

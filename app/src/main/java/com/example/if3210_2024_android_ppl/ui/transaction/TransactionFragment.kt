@@ -22,6 +22,7 @@ import com.example.if3210_2024_android_ppl.database.transaction.Transaction
 import com.example.if3210_2024_android_ppl.database.transaction.TransactionAdapter
 import com.example.if3210_2024_android_ppl.database.transaction.TransactionDatabase
 import com.example.if3210_2024_android_ppl.databinding.FragmentTransactionBinding
+import com.example.if3210_2024_android_ppl.database.user.UserViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,6 +32,7 @@ class TransactionFragment : Fragment() {
 
     val db by lazy { TransactionDatabase(requireContext()) }
     lateinit var transactionAdapter: TransactionAdapter
+    private lateinit var userViewModel: UserViewModel
 
     private var _binding: FragmentTransactionBinding? = null
 
@@ -55,6 +57,7 @@ class TransactionFragment : Fragment() {
             navController.navigate(R.id.navigation_addTransaction)
         }
         setupRecyclerView()
+        userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
         return root
     }
 
@@ -77,8 +80,9 @@ class TransactionFragment : Fragment() {
             }
 
             override fun showLocation(transaction: Transaction) {
-                val location = transaction.location
-                val gmmIntentUri = Uri.parse("geo:0,0?q=$location")
+                val latitude = transaction.latitude
+                val longitude = transaction.longitude
+                val gmmIntentUri = Uri.parse("geo:$latitude,$longitude?q=$latitude,$longitude")
                 val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
                 mapIntent.setPackage("com.google.android.apps.maps")
                 startActivity(mapIntent)
@@ -98,13 +102,16 @@ class TransactionFragment : Fragment() {
     }
 
     fun loadData() {
-        CoroutineScope(Dispatchers.IO).launch {
-            val transactionList = db.transactionDao().getTransactions()
-            Log.d("MainActivity","dbResponse: $transactionList")
-            withContext(Dispatchers.Main) {
-                transactionAdapter.setData(transactionList)
+        userViewModel.getActiveUserEmail { email ->
+            CoroutineScope(Dispatchers.IO).launch {
+                val transactionList = db.transactionDao().getTransactions(email)
+                Log.d("MainActivity","dbResponse: $transactionList")
+                withContext(Dispatchers.Main) {
+                    transactionAdapter.setData(transactionList)
+                }
             }
         }
+
     }
 
     override fun onDestroyView() {

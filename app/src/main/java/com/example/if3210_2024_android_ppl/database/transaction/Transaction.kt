@@ -26,7 +26,7 @@ data class Transaction(
 
     @NonNull
     @ColumnInfo(name = "idUser")
-    val idUser: Int,
+    val idUser: String?,
 
     @ColumnInfo(name = "name")
     val name: String?,
@@ -41,6 +41,12 @@ data class Transaction(
     val date: String?,
 
     @ColumnInfo(name = "category")
-    val category: String?
+    val category: String?,
+
+    @ColumnInfo(name = "latitude")
+    val latitude: Double?,
+
+    @ColumnInfo(name = "longitude")
+    val longitude: Double?
 )
 
