@@ -3,29 +3,47 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@+id/navigation_transaction">
 
     <fragment
-        android:id="@+id/navigation_home"
-        android:name="com.example.if3210_2024_android_ppl.ui.home.HomeFragment"
-        android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        android:id="@+id/navigation_transaction"
+        android:name="com.example.if3210_2024_android_ppl.ui.transaction.TransactionFragment"
+        android:label="@string/title_transaction"
+        android:textAppearance="@style/MontserratBoldText"
+        tools:layout="@layout/fragment_transaction" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.example.if3210_2024_android_ppl.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        android:id="@+id/navigation_addTransaction"
+        android:name="com.example.if3210_2024_android_ppl.ui.transaction.AddTransactionFragment"
+        android:label="@string/title_add_transaction"
+        tools:layout="@layout/fragment_add_transaction" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.example.if3210_2024_android_ppl.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        android:id="@+id/navigation_editTransaction"
+        android:name="com.example.if3210_2024_android_ppl.ui.transaction.AddTransactionFragment"
+        android:label="Edit Transaction"
+        tools:layout="@layout/fragment_add_transaction">
+
+        <argument
+            android:name="transactionId"
+            app:argType="integer" />
+    </fragment>
 
     <fragment
-        android:id="@+id/navigation_camera"
-        android:name="com.example.if3210_2024_android_ppl.ui.camera.CameraFragment"
-        android:label="@string/title_camera"
-        tools:layout="@layout/fragment_notifications" />
+        android:id="@+id/navigation_scan"
+        android:name="com.example.if3210_2024_android_ppl.ui.scan.ScanFragment"
+        android:label="@string/title_scan"
+        tools:layout="@layout/fragment_scan" />
+
+    <fragment
+        android:id="@+id/navigation_graph"
+        android:name="com.example.if3210_2024_android_ppl.ui.graph.GraphFragment"
+        android:label="@string/title_graph"
+        tools:layout="@layout/fragment_graph" />
+
+    <fragment
+        android:id="@+id/navigation_setting"
+        android:name="com.example.if3210_2024_android_ppl.ui.setting.SettingFragment"
+        android:label="@string/title_setting"
+        tools:layout="@layout/fragment_setting" />
 </navigation>
