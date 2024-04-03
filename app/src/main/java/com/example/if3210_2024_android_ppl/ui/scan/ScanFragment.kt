@@ -1,34 +1,24 @@
 package com.example.if3210_2024_android_ppl.ui.scan
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
-import android.os.Build
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import com.example.if3210_2024_android_ppl.databinding.FragmentScanBinding
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Camera
+import android.graphics.Canvas
 import android.graphics.ImageDecoder
 import android.graphics.Matrix
-import android.media.ExifInterface
+import android.graphics.Paint
 import android.net.Uri
-import android.provider.MediaStore
+import android.os.Bundle
 import android.util.Log
-import android.widget.Button
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -39,32 +29,22 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.LifecycleCameraController
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import com.example.if3210_2024_android_ppl.R
+import com.example.if3210_2024_android_ppl.databinding.FragmentScanBinding
 import com.google.common.util.concurrent.ListenableFuture
-import java.io.File
 import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.Locale
+import kotlin.math.log
 
 class ScanFragment : Fragment() {
 
     private var _binding: FragmentScanBinding? = null
 
-//    private val singlePhotoPicker = rememberLauncherForActivityResult(
-//        contract = ActivityResultContracts.PickVisualMedia(),
-//        onResult = { uri: Uri? ->
-//            if (uri != null) {
-//                pickedPhoto = uri
-//            }
-//        }
-//    )
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
     private lateinit var cameraController: LifecycleCameraController
     private lateinit var imageCapture: ImageCapture
     private var pickedPhoto: Uri?=null
+    private var isFrame=false
 
     companion object {
         private val CAMERAX_PERMISSION = arrayOf(
@@ -94,6 +74,7 @@ class ScanFragment : Fragment() {
         }
 
 
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -110,6 +91,8 @@ class ScanFragment : Fragment() {
                 0
             )
         }
+
+        binding.frame.visibility = View.GONE
 
 //        create onclick listener for button
         binding.shutterBut.setOnClickListener {
@@ -140,9 +123,16 @@ class ScanFragment : Fragment() {
 
 
         }
-        binding.flashBut.setOnClickListener {
+        binding.frameBut.setOnClickListener {
             //create a toast
-            Toast.makeText(context, "Flash Clicked", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "frame Clicked", Toast.LENGTH_SHORT).show()
+            if(isFrame){
+                binding.frame.visibility = View.GONE
+                isFrame=false
+            }else{
+                binding.frame.visibility = View.VISIBLE
+                isFrame=true
+            }
 
         }
         binding.pictBut.setOnClickListener {
@@ -158,25 +148,6 @@ class ScanFragment : Fragment() {
         return root
     }
 
-//    private fun selectImageFromGallery() {
-//        // Check if permission to read external storage is granted
-//        if (ContextCompat.checkSelfPermission(
-//                requireContext(),
-//                Manifest.permission.READ_EXTERNAL_STORAGE
-//            ) != PackageManager.PERMISSION_GRANTED
-//        ) {
-//            // Request permission if not granted
-//            ActivityCompat.requestPermissions(
-//                requireActivity(),
-//                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-//                READ_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE
-//            )
-//        } else {
-//            // Permission granted, open gallery
-//            val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-//            startActivityForResult(galleryIntent, GALLERY_REQUEST_CODE)
-//        }
-//    }
 
     private fun openGallery() {
         val photoPickerIntent = Intent(Intent.ACTION_PICK)
@@ -238,8 +209,6 @@ class ScanFragment : Fragment() {
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
-
-
     private fun hasRequiredPermission(): Boolean {
         return CAMERAX_PERMISSION.all {
             ContextCompat.checkSelfPermission(
@@ -249,35 +218,70 @@ class ScanFragment : Fragment() {
         }
     }
 
-
     private fun showImagePreviewDialog(bitmapImage: Bitmap) {
-        Log.d(tag, "Showing image preview dialog...")
-        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_image_preview, null)
-        val imagePreview = dialogView.findViewById<ImageView>(R.id.imagePreview)
+        if (!isFrame) {
+            Log.d(tag, "Showing image preview dialog...")
+            val dialogView =
+                LayoutInflater.from(requireContext()).inflate(R.layout.dialog_image_preview, null)
+            val imagePreview = dialogView.findViewById<ImageView>(R.id.imagePreview)
 
-        // Rotate the bitmap based on its orientation
-        val rotatedBitmap = rotateBitmap(bitmapImage)
+            // Rotate the bitmap based on its orientation
+            val rotatedBitmap = rotateBitmap(bitmapImage)
 
-        imagePreview.setImageBitmap(rotatedBitmap)
+            imagePreview.setImageBitmap(rotatedBitmap)
 //        imagePreview.setImageBitmap(bitmapImage)
 
-        // Adjusting the image view's scale type to fit the entire image within the view
-        imagePreview.scaleType = ImageView.ScaleType.FIT_CENTER
+            // Adjusting the image view's scale type to fit the entire image within the view
+            imagePreview.scaleType = ImageView.ScaleType.FIT_CENTER
 
-        val alertDialog = AlertDialog.Builder(requireContext())
-            .setView(dialogView)
-            .setPositiveButton("Upload") { dialog, _ ->
-                Log.d(tag, "Upload button clicked.")
-                dialog.dismiss()
-            }
-            .setNegativeButton("Cancel") { dialog, _ ->
-                Log.d(tag, "Cancel button clicked.")
-                dialog.dismiss()
-            }
-            .create()
+            val alertDialog = AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .setPositiveButton("Upload") { dialog, _ ->
+                    Log.d(tag, "Upload button clicked.")
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    Log.d(tag, "Cancel button clicked.")
+                    dialog.dismiss()
+                }
+                .create()
 
-        alertDialog.show()
-        Log.d(tag, "Image preview dialog shown.")
+            alertDialog.show()
+            Log.d(tag, "Image preview dialog shown.")
+        }else{
+            Log.d(tag, "Showing image preview dialog...")
+            val dialogView =
+                LayoutInflater.from(requireContext()).inflate(R.layout.dialog_image_preview, null)
+            val imagePreview = dialogView.findViewById<ImageView>(R.id.imagePreview)
+
+            // Rotate the bitmap based on its orientation
+            val rotatedBitmap = rotateBitmap(bitmapImage)
+
+//          put an overlay on the rotated bitmap
+            Log.d(tag, "otw to overlaying bitmap")
+//            val overlay = BitmapFactory.decodeResource(resources, R.drawable.frame)
+            Log.d(tag, "otw2 to overlaying bitmap")
+            val res= overlayBitmap(rotatedBitmap)
+
+            imagePreview.setImageBitmap(res)
+            // Adjusting the image view's scale type to fit the entire image within the view
+            imagePreview.scaleType = ImageView.ScaleType.FIT_CENTER
+
+            val alertDialog = AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .setPositiveButton("Upload") { dialog, _ ->
+                    Log.d(tag, "Upload button clicked.")
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    Log.d(tag, "Cancel button clicked.")
+                    dialog.dismiss()
+                }
+                .create()
+
+            alertDialog.show()
+            Log.d(tag, "Image preview dialog shown.")
+        }
     }
 
     private fun rotateBitmap(bitmap: Bitmap): Bitmap {
@@ -291,10 +295,15 @@ class ScanFragment : Fragment() {
         rotationMatrix.postRotate(270f)
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, rotationMatrix, true)
     }
+    private fun overlayBitmap(bitmap: Bitmap): Bitmap {
 
-
-
-
+        val overlay = BitmapFactory.decodeResource(resources, R.drawable.minum_java)
+        val combinedBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, bitmap.config)
+        val canvas = Canvas(combinedBitmap)
+        canvas.drawBitmap(bitmap, 0f, 0f, null)
+        canvas.drawBitmap(overlay, 0f, 0f, null)
+        return combinedBitmap
+    }
 
 
     override fun onDestroyView() {
