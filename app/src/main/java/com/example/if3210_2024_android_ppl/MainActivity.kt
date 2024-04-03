@@ -48,6 +48,7 @@ class MainActivity : AppCompatActivity() {
         }
         startService(Intent(this, TokenCheckService::class.java))
 
+
         val networkManager = NetworkManager(this)
         networkManager.observe(this) {
             if (it) {
@@ -100,6 +101,10 @@ class MainActivity : AppCompatActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             showSessionExpireDialog()
         }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        return findNavController(R.id.nav_host_fragment_activity_main).navigateUp() || super.onSupportNavigateUp()
     }
 
     private fun showSessionExpireDialog() {

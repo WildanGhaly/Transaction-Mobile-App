@@ -43,10 +43,13 @@
         android:id="@+id/navigation_bill"
         android:name="com.example.if3210_2024_android_ppl.ui.bill.BillFragment"
         android:label="Items"
-        tools:layout="@layout/fragment_bill" >
+        tools:layout="@layout/fragment_bill">
         <argument
             android:name="arrBil"
             app:argType="com.example.if3210_2024_android_ppl.api.MultiBill" />
+        <action
+            android:id="@+id/action_navigation_bill_to_navigation_scan"
+            app:destination="@id/navigation_scan" />
     </fragment>
 
     <fragment

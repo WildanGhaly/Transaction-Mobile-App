@@ -2,10 +2,15 @@ package com.example.if3210_2024_android_ppl.ui.bill
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.if3210_2024_android_ppl.R
@@ -22,12 +27,25 @@ class BillFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setHasOptionsMenu(true)
+        (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
         view.let { super.onViewCreated(it, savedInstanceState) }
-        val args: BillFragmentArgs by navArgs()
         val multiBill = arguments?.getParcelable<MultiBill>("arrBil")
         val billItems = multiBill?.items ?: listOf()
 
         setupRecyclerView(billItems)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                findNavController().navigate(R.id.action_navigation_bill_to_navigation_scan)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun setupRecyclerView(items: List<BillItem>) {
