@@ -1,32 +1,23 @@
 package com.example.if3210_2024_android_ppl.ui.scan
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.example.if3210_2024_android_ppl.databinding.FragmentScanBinding
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Camera
 import android.graphics.ImageDecoder
 import android.graphics.Matrix
-import android.media.ExifInterface
 import android.net.Uri
-import android.provider.MediaStore
 import android.util.Log
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -43,6 +34,7 @@ import com.example.if3210_2024_android_ppl.R
 import com.example.if3210_2024_android_ppl.api.BillResponse
 import com.example.if3210_2024_android_ppl.api.KeystoreHelper
 import com.example.if3210_2024_android_ppl.api.RetrofitInstance
+import com.example.if3210_2024_android_ppl.ui.bill.BillFragment
 import com.google.common.util.concurrent.ListenableFuture
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -51,8 +43,6 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class ScanFragment : Fragment() {
 
@@ -253,10 +243,10 @@ class ScanFragment : Fragment() {
             override fun onResponse(call: retrofit2.Call<BillResponse>, response: retrofit2.Response<BillResponse>) {
                 if (response.isSuccessful) {
                     val billResponse = response.body()
-                    billResponse?.items?.items?.forEach { item ->
-                        // TODO: dapet nih, terus mau diapain
-                        Log.d("ScanFrag","Item: ${item.name}, Quantity: ${item.qty}, Price: ${item.price}")
-                    }
+                    val itemsList = ArrayList(billResponse?.items?.items ?: listOf())
+                    val itemsFragment = BillFragment.newInstance(itemsList)
+                    Log.d("ScanFrag", itemsList.toString())
+                    activity?.supportFragmentManager?.beginTransaction()?.replace(R.id.nav_host_fragment_activity_main, itemsFragment)?.addToBackStack(null)?.commit()
                 } else {
                     Log.d("ScanFrag","Request error: ${response.errorBody()?.string()}")
                 }
