@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -16,6 +17,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.if3210_2024_android_ppl.R
 import com.example.if3210_2024_android_ppl.api.BillItem
 import com.example.if3210_2024_android_ppl.api.MultiBill
+import com.example.if3210_2024_android_ppl.databinding.FragmentBillBinding
+import com.example.if3210_2024_android_ppl.databinding.FragmentTransactionBinding
 
 class BillFragment : Fragment() {
 
@@ -26,16 +29,22 @@ class BillFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+
+        super.onViewCreated(view, savedInstanceState)
 
         setHasOptionsMenu(true)
         (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        view.let { super.onViewCreated(it, savedInstanceState) }
         val multiBill = arguments?.getParcelable<MultiBill>("arrBil")
         val billItems = multiBill?.items ?: listOf()
 
         setupRecyclerView(billItems)
+
+        // Setting up the ImageButton click listener
+        val addButton = view.findViewById<ImageButton>(R.id.add_button)
+        addButton.setOnClickListener {
+            // TODO: SAVE TO DATABASE
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
