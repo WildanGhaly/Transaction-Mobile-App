@@ -9,22 +9,18 @@
         android:id="@+id/itemNameTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:text="Item Name"/>
+        android:textAppearance="?attr/textAppearanceListItem" />
 
     <TextView
         android:id="@+id/itemQuantityTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:text="Quantity: 0"/>
+        android:textAppearance="?attr/textAppearanceListItem" />
 
     <TextView
         android:id="@+id/itemPriceTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:text="Price: $0.00"/>
+        android:textAppearance="?attr/textAppearanceListItem" />
 
 </LinearLayout>

@@ -5,10 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.if3210_2024_android_ppl.R
 import com.example.if3210_2024_android_ppl.api.BillItem
+import com.example.if3210_2024_android_ppl.api.MultiBill
 
 class BillFragment : Fragment() {
 
@@ -19,13 +21,19 @@ class BillFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        items = requireArguments().getParcelableArrayList("items")
-        val adapter = BillAdapter(items ?: listOf())
-        view.findViewById<RecyclerView>(R.id.itemsRecyclerView).apply {
-            layoutManager = LinearLayoutManager(context)
-            this.adapter = adapter
-        }
+        super.onCreate(savedInstanceState)
+        view.let { super.onViewCreated(it, savedInstanceState) }
+        val args: BillFragmentArgs by navArgs()
+        val multiBill = arguments?.getParcelable<MultiBill>("arrBil")
+        val billItems = multiBill?.items ?: listOf()
+
+        setupRecyclerView(billItems)
+    }
+
+    private fun setupRecyclerView(items: List<BillItem>) {
+        val recyclerView = view?.findViewById<RecyclerView>(R.id.itemsRecyclerView)
+        recyclerView?.layoutManager = LinearLayoutManager(context)
+        recyclerView?.adapter = BillAdapter(items)
     }
 
     companion object {

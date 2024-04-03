@@ -30,6 +30,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.LifecycleCameraController
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.navigation.fragment.findNavController
 import com.example.if3210_2024_android_ppl.R
 import com.example.if3210_2024_android_ppl.api.BillResponse
 import com.example.if3210_2024_android_ppl.api.KeystoreHelper
@@ -243,10 +244,16 @@ class ScanFragment : Fragment() {
             override fun onResponse(call: retrofit2.Call<BillResponse>, response: retrofit2.Response<BillResponse>) {
                 if (response.isSuccessful) {
                     val billResponse = response.body()
-                    val itemsList = ArrayList(billResponse?.items?.items ?: listOf())
-                    val itemsFragment = BillFragment.newInstance(itemsList)
-                    Log.d("ScanFrag", itemsList.toString())
-                    activity?.supportFragmentManager?.beginTransaction()?.replace(R.id.nav_host_fragment_activity_main, itemsFragment)?.addToBackStack(null)?.commit()
+                    val itemsList = billResponse?.items
+                    val action = itemsList?.let {
+                        ScanFragmentDirections.actionScanToNavigationBill(
+                            it
+                        )
+                    }
+                    if (action != null) {
+                        findNavController().navigate(action)
+                    }
+
                 } else {
                     Log.d("ScanFrag","Request error: ${response.errorBody()?.string()}")
                 }
