@@ -2,6 +2,7 @@ package com.example.if3210_2024_android_ppl.ui.setting
 
 import android.content.ContentValues
 import android.content.Intent
+import android.content.IntentFilter
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Bundle
@@ -17,7 +18,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.navigation.fragment.findNavController
 import com.example.if3210_2024_android_ppl.LoginActivity
+import com.example.if3210_2024_android_ppl.R
 import com.example.if3210_2024_android_ppl.TokenCheckService
 import com.example.if3210_2024_android_ppl.database.transaction.Transaction
 import com.example.if3210_2024_android_ppl.database.transaction.TransactionDatabase
@@ -46,6 +50,7 @@ class SettingFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+    private val randomTransactionReceiver = RandomTransactionReceiver()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -179,11 +184,35 @@ class SettingFragment : Fragment() {
         }
 
         binding.buttonRandomizeTransaction.setOnClickListener {
-            // TODO: RANDOMIZE TRANSACTION HERE
-            // TODO: RANDOMIZE TRANSACTION HERE
-            // TODO: RANDOMIZE TRANSACTION HERE
+            val randomTitle = generateRandomTitle()
+            Log.d("Main Activity", "dbResponse: $randomTitle")
 
+            // Broadcast intent with random transaction details
+            val intent = Intent("com.example.if3210_2024_android_ppl.RANDOM_TRANSACTION")
+            intent.putExtra("title", randomTitle)
+            LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(intent)
+
+            findNavController().navigate(R.id.navigation_addTransaction)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("MainActivity","dbResponse: masuk")
+        val filter = IntentFilter("com.example.if3210_2024_android_ppl.RANDOM_TRANSACTION")
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(randomTransactionReceiver, filter)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("MainActivity","dbResponse: keluar")
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(randomTransactionReceiver)
+    }
+
+    // Function to generate a random title
+    private fun generateRandomTitle(): String {
+        val titles = listOf("Groceries", "Electronics", "Clothing", "Books", "Restaurant", "Travel")
+        return titles.random()
     }
 
     private fun saveFileToExternalStorage(fileName: String, mimeType: String, fileUri: Uri) {
