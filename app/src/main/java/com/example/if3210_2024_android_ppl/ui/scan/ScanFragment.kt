@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -28,7 +29,6 @@ import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -40,8 +40,16 @@ import androidx.camera.view.LifecycleCameraController
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.if3210_2024_android_ppl.R
+import com.example.if3210_2024_android_ppl.api.BillResponse
+import com.example.if3210_2024_android_ppl.api.KeystoreHelper
+import com.example.if3210_2024_android_ppl.api.RetrofitInstance
 import com.google.common.util.concurrent.ListenableFuture
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -49,18 +57,6 @@ import java.util.Locale
 class ScanFragment : Fragment() {
 
     private var _binding: FragmentScanBinding? = null
-
-//    private val singlePhotoPicker = rememberLauncherForActivityResult(
-//        contract = ActivityResultContracts.PickVisualMedia(),
-//        onResult = { uri: Uri? ->
-//            if (uri != null) {
-//                pickedPhoto = uri
-//            }
-//        }
-//    )
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
     private lateinit var cameraController: LifecycleCameraController
     private lateinit var imageCapture: ImageCapture
@@ -78,7 +74,6 @@ class ScanFragment : Fragment() {
 
     }
 
-
     private val cameraProviderFuture: ListenableFuture<ProcessCameraProvider> by lazy {
         ProcessCameraProvider.getInstance(requireContext())
     }
@@ -87,8 +82,6 @@ class ScanFragment : Fragment() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val selectedImageUri: Uri? = result.data?.data
-                // Do something with the selected image URI
-                // For example, display it in an ImageView
                 loadSelectedImage(selectedImageUri)
             }
         }
@@ -111,23 +104,18 @@ class ScanFragment : Fragment() {
             )
         }
 
-//        create onclick listener for button
         binding.shutterBut.setOnClickListener {
             Toast.makeText(context, "Button Clicked", Toast.LENGTH_SHORT).show()
             if (imageCapture != null) {
-                // Capture image
                 imageCapture?.takePicture(
                     ContextCompat.getMainExecutor(requireContext()),
                     object : ImageCapture.OnImageCapturedCallback() {
                         override fun onCaptureSuccess(imageProxy: ImageProxy) {
-                            // Convert captured image to bitmap
                             val buffer = imageProxy.planes[0].buffer
                             val bytes = ByteArray(buffer.capacity())
                             buffer.get(bytes)
                             val bitmapImage = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                            // Show image preview dialog
                             showImagePreviewDialog(bitmapImage)
-                            // Close the imageProxy to release resources
                             imageProxy.close()
                         }
                         override fun onError(exception: ImageCaptureException) {
@@ -135,48 +123,19 @@ class ScanFragment : Fragment() {
                         }
                     }
                 )
-
             }
-
-
         }
         binding.flashBut.setOnClickListener {
-            //create a toast
             Toast.makeText(context, "Flash Clicked", Toast.LENGTH_SHORT).show()
-
         }
         binding.pictBut.setOnClickListener {
-            // Create a toast
             Toast.makeText(context, "Picture Clicked", Toast.LENGTH_SHORT).show()
-
-                // Permission granted, open gallery
             openGallery()
-
-            }
+        }
         initCamera()
 
         return root
     }
-
-//    private fun selectImageFromGallery() {
-//        // Check if permission to read external storage is granted
-//        if (ContextCompat.checkSelfPermission(
-//                requireContext(),
-//                Manifest.permission.READ_EXTERNAL_STORAGE
-//            ) != PackageManager.PERMISSION_GRANTED
-//        ) {
-//            // Request permission if not granted
-//            ActivityCompat.requestPermissions(
-//                requireActivity(),
-//                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-//                READ_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE
-//            )
-//        } else {
-//            // Permission granted, open gallery
-//            val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-//            startActivityForResult(galleryIntent, GALLERY_REQUEST_CODE)
-//        }
-//    }
 
     private fun openGallery() {
         val photoPickerIntent = Intent(Intent.ACTION_PICK)
@@ -185,11 +144,8 @@ class ScanFragment : Fragment() {
     }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
         if (requestCode == GALLERY_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
-            // Get the URI of the selected image
             val pickedPhoto = data.data
-            // Load the selected image
             loadSelectedImage(pickedPhoto)
         }
     }
@@ -201,7 +157,6 @@ class ScanFragment : Fragment() {
                 val pickedBitmap = ImageDecoder.decodeBitmap(source)
                 val rotated = rotateBitmapfile(pickedBitmap)
 
-                // Show image preview dialog with the picked bitmap
                 rotated?.let { bitmap ->
                     showImagePreviewDialog(bitmap)
                 }
@@ -213,32 +168,23 @@ class ScanFragment : Fragment() {
 
     private fun initCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
-
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
-
-            // Set up the preview use case
             val preview = Preview.Builder()
                 .build()
                 .also { it.setSurfaceProvider(binding.prev.surfaceProvider) }
 
-            // Set up the image capture use case
             imageCapture = ImageCapture.Builder()
                 .build()
 
             try {
-                // Unbind use cases before rebinding
                 cameraProvider.unbindAll()
-
-                // Bind the use cases to the lifecycle of the fragment
                 cameraProvider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, preview, imageCapture)
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
         }, ContextCompat.getMainExecutor(requireContext()))
     }
-
-
 
     private fun hasRequiredPermission(): Boolean {
         return CAMERAX_PERMISSION.all {
@@ -249,25 +195,26 @@ class ScanFragment : Fragment() {
         }
     }
 
-
     private fun showImagePreviewDialog(bitmapImage: Bitmap) {
         Log.d(tag, "Showing image preview dialog...")
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_image_preview, null)
         val imagePreview = dialogView.findViewById<ImageView>(R.id.imagePreview)
-
-        // Rotate the bitmap based on its orientation
         val rotatedBitmap = rotateBitmap(bitmapImage)
-
         imagePreview.setImageBitmap(rotatedBitmap)
-//        imagePreview.setImageBitmap(bitmapImage)
-
-        // Adjusting the image view's scale type to fit the entire image within the view
         imagePreview.scaleType = ImageView.ScaleType.FIT_CENTER
 
         val alertDialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)
             .setPositiveButton("Upload") { dialog, _ ->
                 Log.d(tag, "Upload button clicked.")
+
+                val imageFile = bitmapToFile(rotatedBitmap, requireContext())
+
+                val keystoreHelper = KeystoreHelper(requireContext())
+                val userToken = keystoreHelper.getToken()?:"invalidToken"
+
+                uploadBill(imageFile, userToken)
+
                 dialog.dismiss()
             }
             .setNegativeButton("Cancel") { dialog, _ ->
@@ -292,13 +239,51 @@ class ScanFragment : Fragment() {
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, rotationMatrix, true)
     }
 
-
-
-
-
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun uploadBill(file: File, userToken: String) {
+        val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
+        val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
+
+        val call = RetrofitInstance.api.uploadBill(body, "Bearer $userToken")
+        call.enqueue(object : retrofit2.Callback<BillResponse> {
+            override fun onResponse(call: retrofit2.Call<BillResponse>, response: retrofit2.Response<BillResponse>) {
+                if (response.isSuccessful) {
+                    val billResponse = response.body()
+                    billResponse?.items?.items?.forEach { item ->
+                        // TODO: dapet nih, terus mau diapain
+                        Log.d("ScanFrag","Item: ${item.name}, Quantity: ${item.qty}, Price: ${item.price}")
+                    }
+                } else {
+                    Log.d("ScanFrag","Request error: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: retrofit2.Call<BillResponse>, t: Throwable) {
+                // TODO: Handle failure
+                Log.d("ScanFrag","Failed to make request: ${t.message}")
+            }
+        })
+    }
+
+    private fun bitmapToFile(bitmap: Bitmap, context: Context): File {
+        val resizedBitmap = Bitmap.createScaledBitmap(bitmap, bitmap.width / 2, bitmap.height / 2, true)
+        val file = File(context.cacheDir, "tempImage" + System.currentTimeMillis() + ".jpg")
+        file.createNewFile()
+
+        val bos = ByteArrayOutputStream()
+        resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 50, bos)
+        val bitmapData = bos.toByteArray()
+
+        FileOutputStream(file).apply {
+            write(bitmapData)
+            flush()
+            close()
+        }
+
+        return file
     }
 }
