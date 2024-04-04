@@ -299,17 +299,35 @@ class ScanFragment : Fragment() {
     }
 
     private fun overlayBitmap(bitmap: Bitmap): Bitmap {
+        val overlay = BitmapFactory.decodeResource(resources, R.drawable.duck)
 
-        val overlay = BitmapFactory.decodeResource(resources, R.drawable.minum_java)
+        // Define the desired width and height for the overlay
+        val desiredWidth = bitmap.width   // Adjust as needed
+        val desiredHeight = bitmap.height  // Adjust as needed
+
+        // Scale the overlay bitmap to the desired size
+        val scaledOverlay = Bitmap.createScaledBitmap(overlay, desiredWidth, desiredHeight, true)
+
+        // Create a new bitmap with the dimensions of the background bitmap
         val combinedBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, bitmap.config)
+
+        // Draw the background bitmap onto the canvas
         val canvas = Canvas(combinedBitmap)
         canvas.drawBitmap(bitmap, 0f, 0f, null)
-        canvas.drawBitmap(overlay, 0f, 0f, null)
+
+        // Calculate the position to draw the overlay bitmap (center it)
+        val left = (bitmap.width - scaledOverlay.width) / 1f
+        val bot = (bitmap.height-scaledOverlay.height)/1f
+
+        // Draw the scaled overlay bitmap onto the canvas
+        canvas.drawBitmap(scaledOverlay, left, bot, null)
+
+        // Return the combined bitmap
         return combinedBitmap
     }
 
 
-    override fun onDestroyView() {
+        override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
