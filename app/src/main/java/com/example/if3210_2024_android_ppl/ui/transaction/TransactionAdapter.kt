@@ -27,6 +27,7 @@ class TransactionAdapter (private val transactions: ArrayList<Transaction>, priv
 
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val transaction = transactions[position]
+        holder.view.findViewById<TextView>(R.id.text_date).text = transaction.date
         holder.view.findViewById<TextView>(R.id.text_title).text = transaction.name
         holder.view.findViewById<TextView>(R.id.text_price).text = transaction.price.toString()
         holder.view.findViewById<TextView>(R.id.text_location).text = transaction.location

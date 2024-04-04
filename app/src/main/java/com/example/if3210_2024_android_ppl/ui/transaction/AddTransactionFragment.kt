@@ -114,7 +114,13 @@ class AddTransactionFragment : Fragment() {
         transactionViewModel = ViewModelProvider(this).get(TransactionViewModel::class.java)
 
         val title = RandomTransactionReceiver.title
+        val quantity = RandomTransactionReceiver.quantity
+        val price = RandomTransactionReceiver.price
+        val category = RandomTransactionReceiver.category
         view.findViewById<EditText>(R.id.addTextTitle).setText(title)
+        view.findViewById<EditText>(R.id.addQuantity).setText(quantity.toString())
+        view.findViewById<EditText>(R.id.addPrice).setText(price.toString())
+        view.findViewById<EditText>(R.id.addCategory).setText(category)
 
         return view
     }
