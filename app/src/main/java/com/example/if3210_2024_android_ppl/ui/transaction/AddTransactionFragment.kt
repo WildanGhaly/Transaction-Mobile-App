@@ -1,5 +1,9 @@
 package com.example.if3210_2024_android_ppl.ui.transaction
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
@@ -17,10 +21,12 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.if3210_2024_android_ppl.R
 import com.example.if3210_2024_android_ppl.database.transaction.Transaction
 import com.example.if3210_2024_android_ppl.database.transaction.TransactionDatabase
 import com.example.if3210_2024_android_ppl.database.user.UserViewModel
+import com.example.if3210_2024_android_ppl.ui.setting.RandomTransactionReceiver
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.CoroutineScope
@@ -40,6 +46,7 @@ class AddTransactionFragment : Fragment() {
     )
 
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private val randomTransactionReceiver = RandomTransactionReceiver()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -71,6 +78,9 @@ class AddTransactionFragment : Fragment() {
         }
 
         userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
+
+        val title = RandomTransactionReceiver.title
+        view.findViewById<EditText>(R.id.addTextTitle).setText(title)
 
         return view
     }
@@ -110,6 +120,20 @@ class AddTransactionFragment : Fragment() {
             }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("Main Activity","dbResponse: masuk")
+        val filter = IntentFilter("com.example.if3210_2024_android_ppl.RANDOM_TRANSACTION")
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(randomTransactionReceiver, filter)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("Main Activity","dbResponse: keluar")
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(randomTransactionReceiver)
+    }
+
 
     private fun populateTransactionDetails(transactionId: Int) {
         // Coroutine for fetching transaction details from the database
@@ -196,6 +220,10 @@ class AddTransactionFragment : Fragment() {
                 Toast.makeText(requireContext(), "Please enter title", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
     }
 }
 
