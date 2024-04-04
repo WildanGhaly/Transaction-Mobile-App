@@ -1,12 +1,8 @@
 package com.example.if3210_2024_android_ppl.ui.transaction
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
+import android.Manifest
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.location.Geocoder
-import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,9 +13,9 @@ import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.if3210_2024_android_ppl.R
@@ -27,14 +23,11 @@ import com.example.if3210_2024_android_ppl.database.transaction.Transaction
 import com.example.if3210_2024_android_ppl.database.transaction.TransactionDatabase
 import com.example.if3210_2024_android_ppl.database.user.UserViewModel
 import com.example.if3210_2024_android_ppl.ui.setting.RandomTransactionReceiver
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import com.example.if3210_2024_android_ppl.util.LocationHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.time.LocalDate
-import java.util.*
 
 class AddTransactionFragment : Fragment() {
 
@@ -45,7 +38,7 @@ class AddTransactionFragment : Fragment() {
         "Pembelian", "Pemasukan"
     )
 
-    lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var locationHelper: LocationHelper
     private val randomTransactionReceiver = RandomTransactionReceiver()
 
     override fun onCreateView(
@@ -64,15 +57,21 @@ class AddTransactionFragment : Fragment() {
 
         setupListener(view)
 
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
+        locationHelper = LocationHelper(requireContext())
         view.findViewById<EditText>(R.id.addLocation).setOnClickListener {
-            getLocationDetails { locationName, latitude, longitude ->
-                if (locationName != null && latitude != null && longitude != null) {
-                    Toast.makeText(requireContext(), locationName, Toast.LENGTH_SHORT).show()
-                    Log.d("Location", "Latitude: $latitude, Longitude: $longitude")
+            locationHelper.getLocationDetails { locationName, latitude, longitude ->
+                Toast.makeText(requireContext(), "Getting Your Current Location", Toast.LENGTH_SHORT).show()
+                if (ActivityCompat.checkSelfPermission(
+                        requireContext(),
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                        requireContext(),
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
                     view.findViewById<EditText>(R.id.addLocation).setText("$locationName ($latitude, $longitude)")
                 } else {
-                    Toast.makeText(requireContext(), "Unknown Location", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Input Your Location Manually", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -97,38 +96,6 @@ class AddTransactionFragment : Fragment() {
 
         saveButton.setOnClickListener {
             saveTransaction(view)
-        }
-    }
-
-    private fun getLocationDetails(callback: (locationName: String?, latitude: Double?, longitude: Double?) -> Unit) {
-        val task = fusedLocationProviderClient.lastLocation
-        if (ActivityCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED && ActivityCompat
-                .checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            // Handle the case where permissions are not granted
-            callback.invoke(null, null, null)
-            return
-        }
-        task.addOnSuccessListener { location ->
-            if (location != null) {
-                val geocoder = Geocoder(requireContext(), Locale.getDefault())
-                val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-                if (addresses?.isNotEmpty() == true) {
-                    val address = addresses[0]
-                    val locationName = address.getAddressLine(0)
-                    val latitude = location.latitude
-                    val longitude = location.longitude
-                    callback.invoke(locationName, latitude, longitude)
-                } else {
-                    // If no address found, return null values
-                    callback.invoke(null, null, null)
-                }
-            } else {
-                // If location is null, return null values
-                callback.invoke(null, null, null)
-            }
         }
     }
 
