@@ -21,6 +21,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.if3210_2024_android_ppl.R
 import com.example.if3210_2024_android_ppl.database.transaction.Transaction
 import com.example.if3210_2024_android_ppl.database.transaction.TransactionDatabase
+import com.example.if3210_2024_android_ppl.database.transaction.TransactionViewModel
 import com.example.if3210_2024_android_ppl.database.user.UserViewModel
 import com.example.if3210_2024_android_ppl.ui.setting.RandomTransactionReceiver
 import com.example.if3210_2024_android_ppl.util.LocationHelper
@@ -33,6 +34,7 @@ class AddTransactionFragment : Fragment() {
 
     private val db by lazy { TransactionDatabase(requireContext()) }
     private lateinit var userViewModel: UserViewModel
+    private lateinit var transactionViewModel: TransactionViewModel
     private var transactionId: Int = 0
     private val listItem = arrayOf(
         "Pembelian", "Pemasukan"
@@ -109,6 +111,7 @@ class AddTransactionFragment : Fragment() {
         }
 
         userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
+        transactionViewModel = ViewModelProvider(this).get(TransactionViewModel::class.java)
 
         val title = RandomTransactionReceiver.title
         view.findViewById<EditText>(R.id.addTextTitle).setText(title)
@@ -192,34 +195,30 @@ class AddTransactionFragment : Fragment() {
                 val transactionId = arguments?.getInt("transactionId", 0)
                 if (transactionId != null && transactionId != 0) {
                     // If transactionId is provided and not 0, update the existing transaction
-                    CoroutineScope(Dispatchers.IO).launch {
-                        db.transactionDao().updateTransaction(
-                            Transaction(
-                                transactionId,
-                                email, // You may need to pass the user ID or any other relevant ID here
-                                titleText,
-                                quantityText,
-                                priceText,
-                                locationName,
-                                currentDate,
-                                categoryText,
-                                latitude,
-                                longitude
-                            )
+                    transactionViewModel.updateTransaction(
+                        Transaction(
+                            transactionId,
+                            email, // You may need to pass the user ID or any other relevant ID here
+                            titleText,
+                            quantityText,
+                            priceText,
+                            locationName,
+                            currentDate,
+                            categoryText,
+                            latitude,
+                            longitude
                         )
-                        requireActivity().runOnUiThread {
-                            findNavController().navigateUp()
-                        }
+                    )
+                    requireActivity().runOnUiThread {
+                        findNavController().navigateUp()
                     }
                 } else {
                     // If transactionId is not provided or 0, it means it's for adding a new transaction
-                    CoroutineScope(Dispatchers.IO).launch {
-                        db.transactionDao().addTransaction(
-                            Transaction(0, email, titleText, quantityText, priceText, locationName, currentDate, categoryText, latitude, longitude)
-                        )
-                        requireActivity().runOnUiThread {
-                            findNavController().navigateUp()
-                        }
+                    transactionViewModel.addTransaction(
+                        Transaction(0, email, titleText, quantityText, priceText, locationName, currentDate, categoryText, latitude, longitude)
+                    )
+                    requireActivity().runOnUiThread {
+                        findNavController().navigateUp()
                     }
                 }
             } else {
