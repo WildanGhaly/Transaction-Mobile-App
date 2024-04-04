@@ -40,4 +40,6 @@
     <string name="title_add_transaction">Add Transaction</string>
     <string name="show_location">Show Location</string>
     <string name="randomize_transaction">Randomize\nTransaction</string>
+    <string name="quantity">Quantity</string>
+    <string name="insert_quantity">Insert Quantity</string>
 </resources>

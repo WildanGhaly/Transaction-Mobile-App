@@ -31,8 +31,11 @@ data class Transaction(
     @ColumnInfo(name = "name")
     val name: String?,
 
+    @ColumnInfo(name = "quantity")
+    val quantity: Int?,
+
     @ColumnInfo(name = "price")
-    val price: Int?,
+    val price: Double?,
 
     @ColumnInfo(name = "location")
     val location: String?,

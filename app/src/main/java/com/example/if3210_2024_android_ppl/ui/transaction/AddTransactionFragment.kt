@@ -144,6 +144,7 @@ class AddTransactionFragment : Fragment() {
                 requireActivity().runOnUiThread {
                     // Populate UI fields with transaction details
                     view?.findViewById<EditText>(R.id.addTextTitle)?.setText(transaction.name)
+                    view?.findViewById<EditText>(R.id.addQuantity)?.setText(transaction.quantity.toString())
                     view?.findViewById<EditText>(R.id.addPrice)?.setText(transaction.price.toString())
                     view?.findViewById<EditText>(R.id.addLocation)?.setText(transaction.location)
                     view?.findViewById<AutoCompleteTextView>(R.id.addCategory)?.setText(transaction.category)
@@ -155,7 +156,8 @@ class AddTransactionFragment : Fragment() {
 
     private fun saveTransaction(view: View) {
         val titleText = view.findViewById<EditText>(R.id.addTextTitle).text.toString()
-        val priceText = view.findViewById<EditText>(R.id.addPrice).text.toString().toIntOrNull() ?: 0
+        val quantityText = view.findViewById<EditText>(R.id.addQuantity).text.toString().toIntOrNull() ?: 0
+        val priceText = view.findViewById<EditText>(R.id.addPrice).text.toString().toDoubleOrNull() ?: 0.0
         val locationText = view.findViewById<EditText>(R.id.addLocation).text.toString()
         val categoryText = view.findViewById<AutoCompleteTextView>(R.id.addCategory).text.toString()
         val currentDate = LocalDate.now().toString()
@@ -193,6 +195,7 @@ class AddTransactionFragment : Fragment() {
                                 transactionId,
                                 email, // You may need to pass the user ID or any other relevant ID here
                                 titleText,
+                                quantityText,
                                 priceText,
                                 locationName,
                                 currentDate,
@@ -209,7 +212,7 @@ class AddTransactionFragment : Fragment() {
                     // If transactionId is not provided or 0, it means it's for adding a new transaction
                     CoroutineScope(Dispatchers.IO).launch {
                         db.transactionDao().addTransaction(
-                            Transaction(0, email, titleText, priceText, locationName, currentDate, categoryText, latitude, longitude)
+                            Transaction(0, email, titleText, quantityText, priceText, locationName, currentDate, categoryText, latitude, longitude)
                         )
                         requireActivity().runOnUiThread {
                             findNavController().navigateUp()
