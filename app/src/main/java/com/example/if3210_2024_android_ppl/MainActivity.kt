@@ -28,6 +28,7 @@ import com.example.if3210_2024_android_ppl.database.user.UserViewModel
 import com.example.if3210_2024_android_ppl.databinding.ActivityMainBinding
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.view.ViewGroup
+import androidx.navigation.NavController
 import com.google.android.material.navigationrail.NavigationRailView
 import retrofit2.Call
 import retrofit2.Callback
@@ -37,6 +38,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var networkReceiver: BroadcastReceiver
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,11 +50,12 @@ class MainActivity : AppCompatActivity() {
         }
         startService(Intent(this, TokenCheckService::class.java))
 
+
         val networkManager = NetworkManager(this)
-        networkManager.observe(this) {
-            if (it) {
+        networkManager.observe(this){
+            if(it){
                 Log.d("Network", "Connected")
-            } else {
+            }else{
                 Log.d("Network", "Disconnected")
                 showNetworkErrorDialog()
             }
@@ -72,7 +75,7 @@ class MainActivity : AppCompatActivity() {
 //
 //        val navView: BottomNavigationView = binding.navView
 
-        val navController = findNavController(R.id.nav_host_fragment_activity_main)
+        navController = findNavController(R.id.nav_host_fragment_activity_main)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
@@ -93,6 +96,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
         ContextCompat.registerReceiver(this,networkReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION), ContextCompat.RECEIVER_NOT_EXPORTED)
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        return navController.navigateUp() || super.onSupportNavigateUp()
     }
 
 

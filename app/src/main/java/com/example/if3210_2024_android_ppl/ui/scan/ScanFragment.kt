@@ -3,20 +3,22 @@ package com.example.if3210_2024_android_ppl.ui.scan
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Context
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import com.example.if3210_2024_android_ppl.databinding.FragmentScanBinding
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
 import android.graphics.ImageDecoder
 import android.graphics.Matrix
-import android.graphics.Paint
 import android.net.Uri
-import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.graphics.Canvas
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,17 +31,24 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.LifecycleCameraController
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.if3210_2024_android_ppl.R
-import com.example.if3210_2024_android_ppl.databinding.FragmentScanBinding
+import com.example.if3210_2024_android_ppl.api.BillResponse
+import com.example.if3210_2024_android_ppl.api.KeystoreHelper
+import com.example.if3210_2024_android_ppl.api.RetrofitInstance
+import com.example.if3210_2024_android_ppl.ui.bill.BillFragment
 import com.google.common.util.concurrent.ListenableFuture
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
-import kotlin.math.log
 
 class ScanFragment : Fragment() {
 
     private var _binding: FragmentScanBinding? = null
-
     private val binding get() = _binding!!
     private lateinit var cameraController: LifecycleCameraController
     private lateinit var imageCapture: ImageCapture
@@ -58,7 +67,6 @@ class ScanFragment : Fragment() {
 
     }
 
-
     private val cameraProviderFuture: ListenableFuture<ProcessCameraProvider> by lazy {
         ProcessCameraProvider.getInstance(requireContext())
     }
@@ -67,12 +75,9 @@ class ScanFragment : Fragment() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val selectedImageUri: Uri? = result.data?.data
-                // Do something with the selected image URI
-                // For example, display it in an ImageView
                 loadSelectedImage(selectedImageUri)
             }
         }
-
 
 
     override fun onCreateView(
@@ -93,24 +98,18 @@ class ScanFragment : Fragment() {
         }
 
         binding.frame.visibility = View.GONE
-
-//        create onclick listener for button
         binding.shutterBut.setOnClickListener {
             Toast.makeText(context, "Button Clicked", Toast.LENGTH_SHORT).show()
             if (imageCapture != null) {
-                // Capture image
                 imageCapture?.takePicture(
                     ContextCompat.getMainExecutor(requireContext()),
                     object : ImageCapture.OnImageCapturedCallback() {
                         override fun onCaptureSuccess(imageProxy: ImageProxy) {
-                            // Convert captured image to bitmap
                             val buffer = imageProxy.planes[0].buffer
                             val bytes = ByteArray(buffer.capacity())
                             buffer.get(bytes)
                             val bitmapImage = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                            // Show image preview dialog
                             showImagePreviewDialog(bitmapImage)
-                            // Close the imageProxy to release resources
                             imageProxy.close()
                         }
                         override fun onError(exception: ImageCaptureException) {
@@ -118,11 +117,9 @@ class ScanFragment : Fragment() {
                         }
                     }
                 )
-
             }
-
-
         }
+
         binding.frameBut.setOnClickListener {
             //create a toast
             Toast.makeText(context, "frame Clicked", Toast.LENGTH_SHORT).show()
@@ -136,18 +133,13 @@ class ScanFragment : Fragment() {
 
         }
         binding.pictBut.setOnClickListener {
-            // Create a toast
             Toast.makeText(context, "Picture Clicked", Toast.LENGTH_SHORT).show()
-
-                // Permission granted, open gallery
             openGallery()
-
-            }
+        }
         initCamera()
 
         return root
     }
-
 
     private fun openGallery() {
         val photoPickerIntent = Intent(Intent.ACTION_PICK)
@@ -156,11 +148,8 @@ class ScanFragment : Fragment() {
     }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
         if (requestCode == GALLERY_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
-            // Get the URI of the selected image
             val pickedPhoto = data.data
-            // Load the selected image
             loadSelectedImage(pickedPhoto)
         }
     }
@@ -172,7 +161,6 @@ class ScanFragment : Fragment() {
                 val pickedBitmap = ImageDecoder.decodeBitmap(source)
                 val rotated = rotateBitmapfile(pickedBitmap)
 
-                // Show image preview dialog with the picked bitmap
                 rotated?.let { bitmap ->
                     showImagePreviewDialog(bitmap)
                 }
@@ -184,24 +172,17 @@ class ScanFragment : Fragment() {
 
     private fun initCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
-
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
-
-            // Set up the preview use case
             val preview = Preview.Builder()
                 .build()
                 .also { it.setSurfaceProvider(binding.prev.surfaceProvider) }
 
-            // Set up the image capture use case
             imageCapture = ImageCapture.Builder()
                 .build()
 
             try {
-                // Unbind use cases before rebinding
                 cameraProvider.unbindAll()
-
-                // Bind the use cases to the lifecycle of the fragment
                 cameraProvider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, preview, imageCapture)
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
@@ -219,6 +200,13 @@ class ScanFragment : Fragment() {
     }
 
     private fun showImagePreviewDialog(bitmapImage: Bitmap) {
+        Log.d(tag, "Showing image preview dialog...")
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_image_preview, null)
+        val imagePreview = dialogView.findViewById<ImageView>(R.id.imagePreview)
+        val rotatedBitmap = rotateBitmap(bitmapImage)
+        imagePreview.setImageBitmap(rotatedBitmap)
+        imagePreview.scaleType = ImageView.ScaleType.FIT_CENTER
+
         if (!isFrame) {
             Log.d(tag, "Showing image preview dialog...")
             val dialogView =
@@ -238,6 +226,13 @@ class ScanFragment : Fragment() {
                 .setView(dialogView)
                 .setPositiveButton("Upload") { dialog, _ ->
                     Log.d(tag, "Upload button clicked.")
+                    val imageFile = bitmapToFile(rotatedBitmap, requireContext())
+
+                    val keystoreHelper = KeystoreHelper(requireContext())
+                    val userToken = keystoreHelper.getToken()?:"invalidToken"
+
+                    uploadBill(imageFile, userToken)
+
                     dialog.dismiss()
                 }
                 .setNegativeButton("Cancel") { dialog, _ ->
@@ -271,6 +266,13 @@ class ScanFragment : Fragment() {
                 .setView(dialogView)
                 .setPositiveButton("Upload") { dialog, _ ->
                     Log.d(tag, "Upload button clicked.")
+                    val imageFile = bitmapToFile(rotatedBitmap, requireContext())
+
+                    val keystoreHelper = KeystoreHelper(requireContext())
+                    val userToken = keystoreHelper.getToken()?:"invalidToken"
+
+                    uploadBill(imageFile, userToken)
+
                     dialog.dismiss()
                 }
                 .setNegativeButton("Cancel") { dialog, _ ->
@@ -295,19 +297,88 @@ class ScanFragment : Fragment() {
         rotationMatrix.postRotate(270f)
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, rotationMatrix, true)
     }
-    private fun overlayBitmap(bitmap: Bitmap): Bitmap {
 
-        val overlay = BitmapFactory.decodeResource(resources, R.drawable.minum_java)
+    private fun overlayBitmap(bitmap: Bitmap): Bitmap {
+        val overlay = BitmapFactory.decodeResource(resources, R.drawable.duck)
+
+        // Define the desired width and height for the overlay
+        val desiredWidth = bitmap.width   // Adjust as needed
+        val desiredHeight = bitmap.height  // Adjust as needed
+
+        // Scale the overlay bitmap to the desired size
+        val scaledOverlay = Bitmap.createScaledBitmap(overlay, desiredWidth, desiredHeight, true)
+
+        // Create a new bitmap with the dimensions of the background bitmap
         val combinedBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, bitmap.config)
+
+        // Draw the background bitmap onto the canvas
         val canvas = Canvas(combinedBitmap)
         canvas.drawBitmap(bitmap, 0f, 0f, null)
-        canvas.drawBitmap(overlay, 0f, 0f, null)
+
+        // Calculate the position to draw the overlay bitmap (center it)
+        val left = (bitmap.width - scaledOverlay.width) / 1f
+        val bot = (bitmap.height-scaledOverlay.height)/1f
+
+        // Draw the scaled overlay bitmap onto the canvas
+        canvas.drawBitmap(scaledOverlay, left, bot, null)
+
+        // Return the combined bitmap
         return combinedBitmap
     }
 
 
-    override fun onDestroyView() {
+        override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun uploadBill(file: File, userToken: String) {
+        Log.d("Upload", "Uploading file")
+        val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
+        val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
+
+        val call = RetrofitInstance.api.uploadBill(body, "Bearer $userToken")
+        call.enqueue(object : retrofit2.Callback<BillResponse> {
+            override fun onResponse(call: retrofit2.Call<BillResponse>, response: retrofit2.Response<BillResponse>) {
+                if (response.isSuccessful) {
+                    val billResponse = response.body()
+                    val itemsList = billResponse?.items
+                    val action = itemsList?.let {
+                        ScanFragmentDirections.actionScanToNavigationBill(
+                            it
+                        )
+                    }
+                    if (action != null) {
+                        findNavController().navigate(action)
+                    }
+
+                } else {
+                    Log.d("ScanFrag","Request error: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: retrofit2.Call<BillResponse>, t: Throwable) {
+                // TODO: Handle failure
+                Log.d("ScanFrag","Failed to make request: ${t.message}")
+            }
+        })
+    }
+
+    private fun bitmapToFile(bitmap: Bitmap, context: Context): File {
+        val resizedBitmap = Bitmap.createScaledBitmap(bitmap, bitmap.width / 2, bitmap.height / 2, true)
+        val file = File(context.cacheDir, "tempImage" + System.currentTimeMillis() + ".jpg")
+        file.createNewFile()
+
+        val bos = ByteArrayOutputStream()
+        resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 50, bos)
+        val bitmapData = bos.toByteArray()
+
+        FileOutputStream(file).apply {
+            write(bitmapData)
+            flush()
+            close()
+        }
+
+        return file
     }
 }

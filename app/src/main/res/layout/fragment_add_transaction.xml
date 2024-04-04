@@ -5,157 +5,198 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="30dp"
-        android:layout_marginTop="20dp">
+        android:layout_height="match_parent" >
 
-        <!-- Title Field -->
         <LinearLayout
+            android:id="@+id/linearLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_marginTop="20dp"
-            android:gravity="center_vertical">
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="30dp">
 
-            <TextView
-                android:id="@+id/title_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/title"
-                android:textFontWeight="600"
-                android:textSize="18sp"
-                android:layout_marginStart="0dp"
-                android:textColor="@android:color/black"/>
-
-            <EditText
-                android:id="@+id/addTextTitle"
+            <!-- Title Field -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/login_input_field"
-                android:padding="15dp"
-                android:textColor="@android:color/black"
-                android:textSize="18sp"
-                android:hint="@string/insert_title"
-                android:autofillHints="" />
+                android:layout_marginTop="20dp"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
 
-        </LinearLayout>
-
-        <!-- Price Field -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="20dp"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:id="@+id/price_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/price"
-                android:textFontWeight="600"
-                android:textSize="18sp"
-                android:layout_marginStart="0dp"
-                android:textColor="@android:color/black"/>
-
-            <EditText
-                android:id="@+id/addPrice"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/login_input_field"
-                android:padding="15dp"
-                android:textColor="@android:color/black"
-                android:textSize="18sp"
-                android:hint="@string/insert_price"
-                android:autofillHints=""
-                android:inputType="number"/>
-
-        </LinearLayout>
-
-        <!-- Category Field -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="20dp"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:id="@+id/category_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/category"
-                android:textFontWeight="600"
-                android:textSize="18sp"
-                android:layout_marginStart="0dp"
-                android:textColor="@android:color/black"/>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu">
-
-                <AutoCompleteTextView
-                    android:id="@+id/addCategory"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/login_input_field"
-                    android:padding="15dp"
-                    android:textSize="18sp"
+                <TextView
+                    android:id="@+id/title_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="0dp"
+                    android:text="@string/title"
                     android:textColor="@android:color/black"
-                    android:inputType="none"/>
+                    android:textFontWeight="600"
+                    android:textSize="18sp" />
 
-            </com.google.android.material.textfield.TextInputLayout>
+                <EditText
+                    android:id="@+id/addTextTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints=""
+                    android:background="@drawable/login_input_field"
+                    android:hint="@string/insert_title"
+                    android:padding="15dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
 
-        </LinearLayout>
+            </LinearLayout>
 
-        <!-- Location Field -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="20dp"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:id="@+id/location_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/location"
-                android:textFontWeight="600"
-                android:textSize="18sp"
-                android:layout_marginStart="0dp"
-                android:textColor="@android:color/black"/>
-
-            <EditText
-                android:id="@+id/addLocation"
+            <!-- Quantity Field -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/login_input_field"
-                android:padding="15dp"
-                android:textColor="@android:color/black"
-                android:textSize="18sp"
-                android:hint="@string/insert_location"
-                android:autofillHints="" />
+                android:layout_marginTop="20dp"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
 
+                <TextView
+                    android:id="@+id/quantity_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="0dp"
+                    android:text="@string/quantity"
+                    android:textColor="@android:color/black"
+                    android:textFontWeight="600"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/addQuantity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints=""
+                    android:background="@drawable/login_input_field"
+                    android:hint="@string/insert_quantity"
+                    android:inputType="number"
+                    android:padding="15dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+
+            <!-- Price Field -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/price_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="0dp"
+                    android:text="@string/price"
+                    android:textColor="@android:color/black"
+                    android:textFontWeight="600"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/addPrice"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints=""
+                    android:background="@drawable/login_input_field"
+                    android:hint="@string/insert_price"
+                    android:inputType="numberDecimal"
+                    android:padding="15dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+
+            <!-- Category Field -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/category_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="0dp"
+                    android:text="@string/category"
+                    android:textColor="@android:color/black"
+                    android:textFontWeight="600"
+                    android:textSize="18sp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/addCategory"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/login_input_field"
+                        android:inputType="none"
+                        android:padding="15dp"
+                        android:textColor="@android:color/black"
+                        android:textSize="18sp"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+            <!-- Location Field -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/location_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="0dp"
+                    android:text="@string/location"
+                    android:textColor="@android:color/black"
+                    android:textFontWeight="600"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/addLocation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints=""
+                    android:background="@drawable/login_input_field"
+                    android:hint="@string/insert_location"
+                    android:padding="15dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/buttonSave"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="50dp"
+                android:background="@drawable/rounded_button"
+                android:paddingStart="40dp"
+                android:paddingEnd="40dp"
+                android:text="@string/button_save"
+                android:textColor="@android:color/white"
+                android:textFontWeight="700"
+                android:textSize="18sp" />
         </LinearLayout>
-        <Button
-            android:id="@+id/buttonSave"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/button_save"
-            android:textSize="18sp"
-            android:textFontWeight="700"
-            android:textColor="@android:color/white"
-            android:background="@drawable/rounded_button"
-            android:paddingStart="40dp"
-            android:paddingEnd="40dp"
-            android:layout_marginTop="20dp" />
-    </LinearLayout>
+    </ScrollView>
 
 </RelativeLayout>

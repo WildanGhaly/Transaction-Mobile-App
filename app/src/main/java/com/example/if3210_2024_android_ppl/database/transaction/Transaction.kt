@@ -31,22 +31,25 @@ data class Transaction(
     @ColumnInfo(name = "name")
     val name: String?,
 
+    @ColumnInfo(name = "quantity")
+    val quantity: Int?,
+
     @ColumnInfo(name = "price")
-    val price: Int?,
+    val price: Double?,
 
     @ColumnInfo(name = "location")
-    val location: String?,
+    val location: String? = "ITB",
 
     @ColumnInfo(name = "date")
     val date: String?,
 
     @ColumnInfo(name = "category")
-    val category: String?,
+    val category: String? = "Pemasukan",
 
     @ColumnInfo(name = "latitude")
-    val latitude: Double?,
+    val latitude: Double? = -6.9274065413170725,
 
     @ColumnInfo(name = "longitude")
-    val longitude: Double?
+    val longitude: Double? = 107.76996019357847
 )
 

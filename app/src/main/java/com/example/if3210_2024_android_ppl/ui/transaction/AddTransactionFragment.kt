@@ -1,5 +1,9 @@
 package com.example.if3210_2024_android_ppl.ui.transaction
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
@@ -17,10 +21,12 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.if3210_2024_android_ppl.R
 import com.example.if3210_2024_android_ppl.database.transaction.Transaction
 import com.example.if3210_2024_android_ppl.database.transaction.TransactionDatabase
 import com.example.if3210_2024_android_ppl.database.user.UserViewModel
+import com.example.if3210_2024_android_ppl.ui.setting.RandomTransactionReceiver
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.CoroutineScope
@@ -40,6 +46,7 @@ class AddTransactionFragment : Fragment() {
     )
 
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private val randomTransactionReceiver = RandomTransactionReceiver()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,7 +66,15 @@ class AddTransactionFragment : Fragment() {
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
         view.findViewById<EditText>(R.id.addLocation).setOnClickListener {
-            checkLocationPermission()
+            getLocationDetails { locationName, latitude, longitude ->
+                if (locationName != null && latitude != null && longitude != null) {
+                    Toast.makeText(requireContext(), locationName, Toast.LENGTH_SHORT).show()
+                    Log.d("Location", "Latitude: $latitude, Longitude: $longitude")
+                    view.findViewById<EditText>(R.id.addLocation).setText("$locationName ($latitude, $longitude)")
+                } else {
+                    Toast.makeText(requireContext(), "Unknown Location", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
 
@@ -72,6 +87,9 @@ class AddTransactionFragment : Fragment() {
 
         userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
 
+        val title = RandomTransactionReceiver.title
+        view.findViewById<EditText>(R.id.addTextTitle).setText(title)
+
         return view
     }
     private fun setupListener(view: View) {
@@ -82,14 +100,15 @@ class AddTransactionFragment : Fragment() {
         }
     }
 
-    private fun checkLocationPermission() {
+    private fun getLocationDetails(callback: (locationName: String?, latitude: Double?, longitude: Double?) -> Unit) {
         val task = fusedLocationProviderClient.lastLocation
-        if(ActivityCompat.checkSelfPermission(requireContext(),android.Manifest.permission.ACCESS_FINE_LOCATION)
+        if (ActivityCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED && ActivityCompat
                 .checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED
-        ){
-            ActivityCompat.requestPermissions(requireActivity(), arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 101)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            // Handle the case where permissions are not granted
+            callback.invoke(null, null, null)
             return
         }
         task.addOnSuccessListener { location ->
@@ -101,15 +120,32 @@ class AddTransactionFragment : Fragment() {
                     val locationName = address.getAddressLine(0)
                     val latitude = location.latitude
                     val longitude = location.longitude
-                    Toast.makeText(requireContext(), locationName, Toast.LENGTH_SHORT).show()
-                    // Update the locationText with coordinates
-                    view?.findViewById<EditText>(R.id.addLocation)?.setText("$locationName ($latitude, $longitude)")
+                    callback.invoke(locationName, latitude, longitude)
                 } else {
-                    Toast.makeText(requireContext(), "Unknown Location", Toast.LENGTH_SHORT).show()
+                    // If no address found, return null values
+                    callback.invoke(null, null, null)
                 }
+            } else {
+                // If location is null, return null values
+                callback.invoke(null, null, null)
             }
         }
     }
+
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("Main Activity","dbResponse: masuk")
+        val filter = IntentFilter("com.example.if3210_2024_android_ppl.RANDOM_TRANSACTION")
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(randomTransactionReceiver, filter)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("Main Activity","dbResponse: keluar")
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(randomTransactionReceiver)
+    }
+
 
     private fun populateTransactionDetails(transactionId: Int) {
         // Coroutine for fetching transaction details from the database
@@ -120,6 +156,7 @@ class AddTransactionFragment : Fragment() {
                 requireActivity().runOnUiThread {
                     // Populate UI fields with transaction details
                     view?.findViewById<EditText>(R.id.addTextTitle)?.setText(transaction.name)
+                    view?.findViewById<EditText>(R.id.addQuantity)?.setText(transaction.quantity.toString())
                     view?.findViewById<EditText>(R.id.addPrice)?.setText(transaction.price.toString())
                     view?.findViewById<EditText>(R.id.addLocation)?.setText(transaction.location)
                     view?.findViewById<AutoCompleteTextView>(R.id.addCategory)?.setText(transaction.category)
@@ -131,7 +168,8 @@ class AddTransactionFragment : Fragment() {
 
     private fun saveTransaction(view: View) {
         val titleText = view.findViewById<EditText>(R.id.addTextTitle).text.toString()
-        val priceText = view.findViewById<EditText>(R.id.addPrice).text.toString().toIntOrNull() ?: 0
+        val quantityText = view.findViewById<EditText>(R.id.addQuantity).text.toString().toIntOrNull() ?: 0
+        val priceText = view.findViewById<EditText>(R.id.addPrice).text.toString().toDoubleOrNull() ?: 0.0
         val locationText = view.findViewById<EditText>(R.id.addLocation).text.toString()
         val categoryText = view.findViewById<AutoCompleteTextView>(R.id.addCategory).text.toString()
         val currentDate = LocalDate.now().toString()
@@ -169,6 +207,7 @@ class AddTransactionFragment : Fragment() {
                                 transactionId,
                                 email, // You may need to pass the user ID or any other relevant ID here
                                 titleText,
+                                quantityText,
                                 priceText,
                                 locationName,
                                 currentDate,
@@ -185,7 +224,7 @@ class AddTransactionFragment : Fragment() {
                     // If transactionId is not provided or 0, it means it's for adding a new transaction
                     CoroutineScope(Dispatchers.IO).launch {
                         db.transactionDao().addTransaction(
-                            Transaction(0, email, titleText, priceText, locationName, currentDate, categoryText, latitude, longitude)
+                            Transaction(0, email, titleText, quantityText, priceText, locationName, currentDate, categoryText, latitude, longitude)
                         )
                         requireActivity().runOnUiThread {
                             findNavController().navigateUp()
@@ -196,6 +235,10 @@ class AddTransactionFragment : Fragment() {
                 Toast.makeText(requireContext(), "Please enter title", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
     }
 }
 
