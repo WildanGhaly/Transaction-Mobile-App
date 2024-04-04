@@ -146,6 +146,13 @@ class AddTransactionFragment : Fragment() {
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(randomTransactionReceiver)
     }
 
+    fun resetTransactionData() {
+        RandomTransactionReceiver.title = null
+        RandomTransactionReceiver.quantity = 0
+        RandomTransactionReceiver.price = 0.0
+        RandomTransactionReceiver.category = null
+    }
+
 
     private fun populateTransactionDetails(transactionId: Int) {
         // Coroutine for fetching transaction details from the database
@@ -235,6 +242,7 @@ class AddTransactionFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        resetTransactionData()
     }
 }
 
