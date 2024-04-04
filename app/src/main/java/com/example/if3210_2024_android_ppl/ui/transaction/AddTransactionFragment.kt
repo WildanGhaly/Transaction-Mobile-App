@@ -41,6 +41,10 @@ class AddTransactionFragment : Fragment() {
     private lateinit var locationHelper: LocationHelper
     private val randomTransactionReceiver = RandomTransactionReceiver()
 
+    companion object {
+        private const val PERMISSIONS_REQUEST_LOCATION = 1002
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -56,6 +60,26 @@ class AddTransactionFragment : Fragment() {
         }
 
         setupListener(view)
+
+        val permissionFineLocation = ActivityCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+        val permissionCoarseLocation = ActivityCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+        if (permissionFineLocation != PackageManager.PERMISSION_GRANTED || permissionCoarseLocation != PackageManager.PERMISSION_GRANTED) {
+            // Request both fine and coarse location permissions
+            requestPermissions(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ), PERMISSIONS_REQUEST_LOCATION
+            )
+        } else {
+            // Permissions are already granted, proceed with the location fetching
+        }
 
         locationHelper = LocationHelper(requireContext())
         view.findViewById<EditText>(R.id.addLocation).setOnClickListener {
