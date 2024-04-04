@@ -8,7 +8,6 @@ import android.content.res.Configuration
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.content.BroadcastReceiver
-import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
@@ -108,10 +107,6 @@ class MainActivity : AppCompatActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             showSessionExpireDialog()
         }
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        return findNavController(R.id.nav_host_fragment_activity_main).navigateUp() || super.onSupportNavigateUp()
     }
 
     private fun showSessionExpireDialog() {
