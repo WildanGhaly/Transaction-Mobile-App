@@ -66,7 +66,15 @@ class AddTransactionFragment : Fragment() {
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
         view.findViewById<EditText>(R.id.addLocation).setOnClickListener {
-            checkLocationPermission()
+            getLocationDetails { locationName, latitude, longitude ->
+                if (locationName != null && latitude != null && longitude != null) {
+                    Toast.makeText(requireContext(), locationName, Toast.LENGTH_SHORT).show()
+                    Log.d("Location", "Latitude: $latitude, Longitude: $longitude")
+                    view.findViewById<EditText>(R.id.addLocation).setText("$locationName ($latitude, $longitude)")
+                } else {
+                    Toast.makeText(requireContext(), "Unknown Location", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
 
@@ -92,14 +100,15 @@ class AddTransactionFragment : Fragment() {
         }
     }
 
-    private fun checkLocationPermission() {
+    private fun getLocationDetails(callback: (locationName: String?, latitude: Double?, longitude: Double?) -> Unit) {
         val task = fusedLocationProviderClient.lastLocation
-        if(ActivityCompat.checkSelfPermission(requireContext(),android.Manifest.permission.ACCESS_FINE_LOCATION)
+        if (ActivityCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED && ActivityCompat
                 .checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED
-        ){
-            ActivityCompat.requestPermissions(requireActivity(), arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 101)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            // Handle the case where permissions are not granted
+            callback.invoke(null, null, null)
             return
         }
         task.addOnSuccessListener { location ->
@@ -111,15 +120,18 @@ class AddTransactionFragment : Fragment() {
                     val locationName = address.getAddressLine(0)
                     val latitude = location.latitude
                     val longitude = location.longitude
-                    Toast.makeText(requireContext(), locationName, Toast.LENGTH_SHORT).show()
-                    // Update the locationText with coordinates
-                    view?.findViewById<EditText>(R.id.addLocation)?.setText("$locationName ($latitude, $longitude)")
+                    callback.invoke(locationName, latitude, longitude)
                 } else {
-                    Toast.makeText(requireContext(), "Unknown Location", Toast.LENGTH_SHORT).show()
+                    // If no address found, return null values
+                    callback.invoke(null, null, null)
                 }
+            } else {
+                // If location is null, return null values
+                callback.invoke(null, null, null)
             }
         }
     }
+
 
     override fun onResume() {
         super.onResume()

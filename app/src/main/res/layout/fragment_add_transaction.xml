@@ -106,7 +106,7 @@
                     android:autofillHints=""
                     android:background="@drawable/login_input_field"
                     android:hint="@string/insert_price"
-                    android:inputType="number"
+                    android:inputType="numberDecimal"
                     android:padding="15dp"
                     android:textColor="@android:color/black"
                     android:textSize="18sp" />
