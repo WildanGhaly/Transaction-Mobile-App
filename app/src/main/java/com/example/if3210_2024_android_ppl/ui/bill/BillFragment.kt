@@ -52,7 +52,6 @@ class BillFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
         super.onViewCreated(view, savedInstanceState)
         userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
 
@@ -62,52 +61,49 @@ class BillFragment : Fragment() {
         val multiBill = arguments?.getParcelable<MultiBill>("arrBil")
         val billItems = multiBill?.items ?: listOf()
 
+        val permissionFineLocation = ActivityCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+        val permissionCoarseLocation = ActivityCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+        if (permissionFineLocation != PackageManager.PERMISSION_GRANTED || permissionCoarseLocation != PackageManager.PERMISSION_GRANTED) {
+            // Request both fine and coarse location permissions
+            requestPermissions(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ), PERMISSIONS_REQUEST_LOCATION
+            )
+        } else {
+            // Permissions are already granted, proceed with the location fetching
+        }
+
         setupRecyclerView(billItems)
 
         // Setting up the ImageButton click listener
         val saveButton = view.findViewById<ImageButton>(R.id.save_button)
         saveButton.setOnClickListener {
-            val locationName    = null?:    "ITB"
-            val latitude        = null?:    -6.9274065413170725
-            val longitude       = null?:    107.76996019357847
+            fetchAndSaveLocation(billItems)
+        }
+    }
 
-            if (ActivityCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                locationHelper.getLocationDetails { locationName, latitude, longitude ->
-                    userViewModel.getActiveUserEmail { email ->
-                        val transactions = billItems.map { item ->
-                            Transaction(
-                                id = 0,
-                                idUser = email,
-                                name = item.name,
-                                price = item.price,
-                                quantity = item.qty,
-                                location = locationName,
-                                date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(
-                                    Date()
-                                ),
-                                category = "Pemasukan",
-                                latitude = latitude,
-                                longitude = longitude
-                            )
-                        }
+    private fun fetchAndSaveLocation(billItems : List<BillItem>){
+        val locationName    = null?:    "ITB"
+        val latitude        = null?:    -6.9274065413170725
+        val longitude       = null?:    107.76996019357847
 
-                        CoroutineScope(Dispatchers.IO).launch {
-                            db.transactionDao().addMultiTransaction(transactions)
-                            withContext(Dispatchers.Main) {
-                                findNavController().navigateUp()
-                            }
-                        }
-                    }
-                }
-            }
-            else {
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            locationHelper.getLocationDetails { locationName, latitude, longitude ->
                 userViewModel.getActiveUserEmail { email ->
                     val transactions = billItems.map { item ->
                         Transaction(
@@ -135,6 +131,33 @@ class BillFragment : Fragment() {
                 }
             }
         }
+        else {
+            userViewModel.getActiveUserEmail { email ->
+                val transactions = billItems.map { item ->
+                    Transaction(
+                        id = 0,
+                        idUser = email,
+                        name = item.name,
+                        price = item.price,
+                        quantity = item.qty,
+                        location = locationName,
+                        date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(
+                            Date()
+                        ),
+                        category = "Pemasukan",
+                        latitude = latitude,
+                        longitude = longitude
+                    )
+                }
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    db.transactionDao().addMultiTransaction(transactions)
+                    withContext(Dispatchers.Main) {
+                        findNavController().navigateUp()
+                    }
+                }
+            }
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -154,6 +177,7 @@ class BillFragment : Fragment() {
     }
 
     companion object {
+        const val PERMISSIONS_REQUEST_LOCATION = 101
         fun newInstance(items: ArrayList<BillItem>): BillFragment {
             val fragment = BillFragment()
             val args = Bundle()
