@@ -39,8 +39,6 @@ class GraphFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val graphViewModel =
-            ViewModelProvider(this).get(GraphViewModel::class.java)
 
         _binding = FragmentGraphBinding.inflate(inflater, container, false)
         val root: View = binding.root

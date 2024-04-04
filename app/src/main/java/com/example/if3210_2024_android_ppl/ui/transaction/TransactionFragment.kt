@@ -7,19 +7,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageButton
-import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import com.example.if3210_2024_android_ppl.R
 import com.example.if3210_2024_android_ppl.database.transaction.Transaction
-import com.example.if3210_2024_android_ppl.database.transaction.TransactionAdapter
 import com.example.if3210_2024_android_ppl.database.transaction.TransactionDatabase
 import com.example.if3210_2024_android_ppl.databinding.FragmentTransactionBinding
 import com.example.if3210_2024_android_ppl.database.user.UserViewModel
@@ -45,8 +41,6 @@ class TransactionFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val transactionViewModel =
-            ViewModelProvider(this).get(TransactionViewModel::class.java)
 
         _binding = FragmentTransactionBinding.inflate(inflater, container, false)
         val root: View = binding.root
