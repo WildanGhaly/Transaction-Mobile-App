@@ -14,13 +14,13 @@
         >
     </androidx.camera.view.PreviewView>
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/frame"
         android:layout_alignParentTop="true"
         android:layout_marginTop="60dp"
-        android:layout_width="400dp"
-        android:layout_height="400dp"
-        android:layout_centerInParent="true"
-        android:src="@drawable/red_frame"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+
+        android:src="@drawable/minum_java"
         android:contentDescription="frame" />
     <ImageButton
         android:id="@+id/shutterBut"
@@ -41,10 +41,10 @@
         android:layout_marginStart="30dp"
         />
     <ImageButton
-        android:id="@+id/flashBut"
+        android:id="@+id/frameBut"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:background="@drawable/flash"
+        android:background="@drawable/frame"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="70dp"
         android:layout_alignParentEnd="true"

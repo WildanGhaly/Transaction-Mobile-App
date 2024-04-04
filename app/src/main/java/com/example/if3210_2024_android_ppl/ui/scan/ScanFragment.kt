@@ -18,6 +18,7 @@ import android.graphics.ImageDecoder
 import android.graphics.Matrix
 import android.net.Uri
 import android.util.Log
+import android.graphics.Canvas
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -52,6 +53,7 @@ class ScanFragment : Fragment() {
     private lateinit var cameraController: LifecycleCameraController
     private lateinit var imageCapture: ImageCapture
     private var pickedPhoto: Uri?=null
+    private var isFrame=false
 
     companion object {
         private val CAMERAX_PERMISSION = arrayOf(
@@ -95,6 +97,7 @@ class ScanFragment : Fragment() {
             )
         }
 
+        binding.frame.visibility = View.GONE
         binding.shutterBut.setOnClickListener {
             Toast.makeText(context, "Button Clicked", Toast.LENGTH_SHORT).show()
             if (imageCapture != null) {
@@ -116,8 +119,18 @@ class ScanFragment : Fragment() {
                 )
             }
         }
-        binding.flashBut.setOnClickListener {
-            Toast.makeText(context, "Flash Clicked", Toast.LENGTH_SHORT).show()
+
+        binding.frameBut.setOnClickListener {
+            //create a toast
+            Toast.makeText(context, "frame Clicked", Toast.LENGTH_SHORT).show()
+            if(isFrame){
+                binding.frame.visibility = View.GONE
+                isFrame=false
+            }else{
+                binding.frame.visibility = View.VISIBLE
+                isFrame=true
+            }
+
         }
         binding.pictBut.setOnClickListener {
             Toast.makeText(context, "Picture Clicked", Toast.LENGTH_SHORT).show()
@@ -194,28 +207,83 @@ class ScanFragment : Fragment() {
         imagePreview.setImageBitmap(rotatedBitmap)
         imagePreview.scaleType = ImageView.ScaleType.FIT_CENTER
 
-        val alertDialog = AlertDialog.Builder(requireContext())
-            .setView(dialogView)
-            .setPositiveButton("Upload") { dialog, _ ->
-                Log.d(tag, "Upload button clicked.")
+        if (!isFrame) {
+            Log.d(tag, "Showing image preview dialog...")
+            val dialogView =
+                LayoutInflater.from(requireContext()).inflate(R.layout.dialog_image_preview, null)
+            val imagePreview = dialogView.findViewById<ImageView>(R.id.imagePreview)
 
-                val imageFile = bitmapToFile(rotatedBitmap, requireContext())
+            // Rotate the bitmap based on its orientation
+            val rotatedBitmap = rotateBitmap(bitmapImage)
 
-                val keystoreHelper = KeystoreHelper(requireContext())
-                val userToken = keystoreHelper.getToken()?:"invalidToken"
+            imagePreview.setImageBitmap(rotatedBitmap)
+//        imagePreview.setImageBitmap(bitmapImage)
 
-                uploadBill(imageFile, userToken)
+            // Adjusting the image view's scale type to fit the entire image within the view
+            imagePreview.scaleType = ImageView.ScaleType.FIT_CENTER
 
-                dialog.dismiss()
-            }
-            .setNegativeButton("Cancel") { dialog, _ ->
-                Log.d(tag, "Cancel button clicked.")
-                dialog.dismiss()
-            }
-            .create()
+            val alertDialog = AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .setPositiveButton("Upload") { dialog, _ ->
+                    Log.d(tag, "Upload button clicked.")
+                    val imageFile = bitmapToFile(rotatedBitmap, requireContext())
 
-        alertDialog.show()
-        Log.d(tag, "Image preview dialog shown.")
+                    val keystoreHelper = KeystoreHelper(requireContext())
+                    val userToken = keystoreHelper.getToken()?:"invalidToken"
+
+                    uploadBill(imageFile, userToken)
+
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    Log.d(tag, "Cancel button clicked.")
+                    dialog.dismiss()
+                }
+                .create()
+
+            alertDialog.show()
+            Log.d(tag, "Image preview dialog shown.")
+        }else{
+            Log.d(tag, "Showing image preview dialog...")
+            val dialogView =
+                LayoutInflater.from(requireContext()).inflate(R.layout.dialog_image_preview, null)
+            val imagePreview = dialogView.findViewById<ImageView>(R.id.imagePreview)
+
+            // Rotate the bitmap based on its orientation
+            val rotatedBitmap = rotateBitmap(bitmapImage)
+
+//          put an overlay on the rotated bitmap
+            Log.d(tag, "otw to overlaying bitmap")
+//            val overlay = BitmapFactory.decodeResource(resources, R.drawable.frame)
+            Log.d(tag, "otw2 to overlaying bitmap")
+            val res= overlayBitmap(rotatedBitmap)
+
+            imagePreview.setImageBitmap(res)
+            // Adjusting the image view's scale type to fit the entire image within the view
+            imagePreview.scaleType = ImageView.ScaleType.FIT_CENTER
+
+            val alertDialog = AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .setPositiveButton("Upload") { dialog, _ ->
+                    Log.d(tag, "Upload button clicked.")
+                    val imageFile = bitmapToFile(rotatedBitmap, requireContext())
+
+                    val keystoreHelper = KeystoreHelper(requireContext())
+                    val userToken = keystoreHelper.getToken()?:"invalidToken"
+
+                    uploadBill(imageFile, userToken)
+
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    Log.d(tag, "Cancel button clicked.")
+                    dialog.dismiss()
+                }
+                .create()
+
+            alertDialog.show()
+            Log.d(tag, "Image preview dialog shown.")
+        }
     }
 
     private fun rotateBitmap(bitmap: Bitmap): Bitmap {
@@ -230,12 +298,24 @@ class ScanFragment : Fragment() {
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, rotationMatrix, true)
     }
 
+    private fun overlayBitmap(bitmap: Bitmap): Bitmap {
+
+        val overlay = BitmapFactory.decodeResource(resources, R.drawable.minum_java)
+        val combinedBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, bitmap.config)
+        val canvas = Canvas(combinedBitmap)
+        canvas.drawBitmap(bitmap, 0f, 0f, null)
+        canvas.drawBitmap(overlay, 0f, 0f, null)
+        return combinedBitmap
+    }
+
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
     private fun uploadBill(file: File, userToken: String) {
+        Log.d("Upload", "Uploading file")
         val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
         val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
 
