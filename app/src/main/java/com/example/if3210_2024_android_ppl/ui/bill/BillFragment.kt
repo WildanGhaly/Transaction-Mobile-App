@@ -1,5 +1,7 @@
 package com.example.if3210_2024_android_ppl.ui.bill
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -7,7 +9,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.AppBarConfiguration
@@ -17,20 +21,40 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.if3210_2024_android_ppl.R
 import com.example.if3210_2024_android_ppl.api.BillItem
 import com.example.if3210_2024_android_ppl.api.MultiBill
+import com.example.if3210_2024_android_ppl.database.transaction.Transaction
+import com.example.if3210_2024_android_ppl.database.transaction.TransactionDatabase
+import com.example.if3210_2024_android_ppl.database.user.UserViewModel
 import com.example.if3210_2024_android_ppl.databinding.FragmentBillBinding
 import com.example.if3210_2024_android_ppl.databinding.FragmentTransactionBinding
+import com.example.if3210_2024_android_ppl.util.LocationHelper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class BillFragment : Fragment() {
 
     private var items: List<BillItem>? = null
+    private val db by lazy { TransactionDatabase(requireContext()) }
+    private lateinit var userViewModel: UserViewModel
+    private lateinit var locationHelper: LocationHelper
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_bill, container, false)
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        locationHelper = LocationHelper(requireContext())
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
         super.onViewCreated(view, savedInstanceState)
+        userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
 
         setHasOptionsMenu(true)
         (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -41,9 +65,75 @@ class BillFragment : Fragment() {
         setupRecyclerView(billItems)
 
         // Setting up the ImageButton click listener
-        val addButton = view.findViewById<ImageButton>(R.id.add_button)
-        addButton.setOnClickListener {
-            // TODO: SAVE TO DATABASE
+        val saveButton = view.findViewById<ImageButton>(R.id.save_button)
+        saveButton.setOnClickListener {
+            val locationName    = null?:    "ITB"
+            val latitude        = null?:    -6.9274065413170725
+            val longitude       = null?:    107.76996019357847
+
+            if (ActivityCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                locationHelper.getLocationDetails { locationName, latitude, longitude ->
+                    userViewModel.getActiveUserEmail { email ->
+                        val transactions = billItems.map { item ->
+                            Transaction(
+                                id = 0,
+                                idUser = email,
+                                name = item.name,
+                                price = item.price,
+                                quantity = item.qty,
+                                location = locationName,
+                                date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(
+                                    Date()
+                                ),
+                                category = "Pemasukan",
+                                latitude = latitude,
+                                longitude = longitude
+                            )
+                        }
+
+                        CoroutineScope(Dispatchers.IO).launch {
+                            db.transactionDao().addMultiTransaction(transactions)
+                            withContext(Dispatchers.Main) {
+                                findNavController().navigateUp()
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                userViewModel.getActiveUserEmail { email ->
+                    val transactions = billItems.map { item ->
+                        Transaction(
+                            id = 0,
+                            idUser = email,
+                            name = item.name,
+                            price = item.price,
+                            quantity = item.qty,
+                            location = locationName,
+                            date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(
+                                Date()
+                            ),
+                            category = "Pemasukan",
+                            latitude = latitude,
+                            longitude = longitude
+                        )
+                    }
+
+                    CoroutineScope(Dispatchers.IO).launch {
+                        db.transactionDao().addMultiTransaction(transactions)
+                        withContext(Dispatchers.Main) {
+                            findNavController().navigateUp()
+                        }
+                    }
+                }
+            }
         }
     }
 
