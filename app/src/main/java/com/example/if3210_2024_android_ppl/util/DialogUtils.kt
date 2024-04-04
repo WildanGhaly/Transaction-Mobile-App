@@ -53,17 +53,35 @@ object DialogUtils {
 
     fun showFileSavedDialog(context: Context) {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_file_saved, null)
-        val fileSavedTextView = dialogView.findViewById<TextView>(R.id.textViewFileSaved)
-
         val dialog = AlertDialog.Builder(context)
             .setView(dialogView)
             .create()
-
         dialogView.findViewById<Button>(R.id.buttonTryAgain).setOnClickListener {
             dialog.dismiss()
         }
-
         dialog.show()
+    }
+
+    fun showTransactionSavedDialog(context: Context) {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_transaction_saved, null)
+        val dialog = AlertDialog.Builder(context)
+            .setView(dialogView)
+            .create()
+        dialogView.findViewById<Button>(R.id.buttonTryAgain).setOnClickListener {
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
+    fun showSomethingWentWrongDialog(context: Context) {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_something_went_wrong, null)
+        val dialog = AlertDialog.Builder(context)
+            .setView(dialogView)
+            .create()
+        dialog.show()
+        dialogView.findViewById<Button>(R.id.buttonTryAgain).setOnClickListener {
+            dialog.dismiss()
+        }
     }
 
 }

@@ -3,15 +3,18 @@ package com.example.if3210_2024_android_ppl.ui.bill
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.AppBarConfiguration
@@ -26,11 +29,14 @@ import com.example.if3210_2024_android_ppl.database.transaction.TransactionDatab
 import com.example.if3210_2024_android_ppl.database.user.UserViewModel
 import com.example.if3210_2024_android_ppl.databinding.FragmentBillBinding
 import com.example.if3210_2024_android_ppl.databinding.FragmentTransactionBinding
+import com.example.if3210_2024_android_ppl.util.DialogUtils
 import com.example.if3210_2024_android_ppl.util.LocationHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -86,14 +92,16 @@ class BillFragment : Fragment() {
         // Setting up the ImageButton click listener
         val saveButton = view.findViewById<ImageButton>(R.id.save_button)
         saveButton.setOnClickListener {
-            fetchAndSaveLocation(billItems)
+            val loadingDialog = DialogUtils.showLoadingDialog(requireContext())
+            fetchAndSaveLocation(billItems, loadingDialog)
         }
+
     }
 
-    private fun fetchAndSaveLocation(billItems : List<BillItem>){
-        val locationName    = null?:    "ITB"
-        val latitude        = null?:    -6.9274065413170725
-        val longitude       = null?:    107.76996019357847
+    private fun fetchAndSaveLocation(billItems: List<BillItem>, loadingDialog: AlertDialog) {
+        val locationNameTemp = null ?: "ITB"
+        val latitudeTemp = null ?: -6.9274065413170725
+        val longitudeTemp = null ?: 107.76996019357847
 
         if (ActivityCompat.checkSelfPermission(
                 requireContext(),
@@ -104,56 +112,48 @@ class BillFragment : Fragment() {
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             locationHelper.getLocationDetails { locationName, latitude, longitude ->
-                userViewModel.getActiveUserEmail { email ->
-                    val transactions = billItems.map { item ->
-                        Transaction(
-                            id = 0,
-                            idUser = email,
-                            name = item.name,
-                            price = item.price,
-                            quantity = item.qty,
-                            location = locationName,
-                            date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(
-                                Date()
-                            ),
-                            category = "Pemasukan",
-                            latitude = latitude,
-                            longitude = longitude
-                        )
-                    }
-
-                    CoroutineScope(Dispatchers.IO).launch {
-                        db.transactionDao().addMultiTransaction(transactions)
-                        withContext(Dispatchers.Main) {
-                            findNavController().navigateUp()
-                        }
-                    }
-                }
+                saveTransactions(billItems, locationName?:locationNameTemp, latitude?:latitudeTemp, longitude?:longitudeTemp, loadingDialog)
             }
+        } else {
+            saveTransactions(billItems, locationNameTemp, latitudeTemp, longitudeTemp, loadingDialog)
         }
-        else {
-            userViewModel.getActiveUserEmail { email ->
-                val transactions = billItems.map { item ->
-                    Transaction(
-                        id = 0,
-                        idUser = email,
-                        name = item.name,
-                        price = item.price,
-                        quantity = item.qty,
-                        location = locationName,
-                        date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(
-                            Date()
-                        ),
-                        category = "Pemasukan",
-                        latitude = latitude,
-                        longitude = longitude
-                    )
-                }
+    }
 
-                CoroutineScope(Dispatchers.IO).launch {
+    private fun saveTransactions(
+        billItems: List<BillItem>,
+        locationName: String?,
+        latitude: Double,
+        longitude: Double,
+        loadingDialog: AlertDialog
+    ) {
+        userViewModel.getActiveUserEmail { email ->
+            val transactions = billItems.map { item ->
+                Transaction(
+                    id = 0,
+                    idUser = email,
+                    name = item.name,
+                    price = item.price,
+                    quantity = item.qty,
+                    location = locationName,
+                    date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()),
+                    category = "Pemasukan",
+                    latitude = latitude,
+                    longitude = longitude
+                )
+            }
+
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
                     db.transactionDao().addMultiTransaction(transactions)
                     withContext(Dispatchers.Main) {
+                        loadingDialog.dismiss()
+                        DialogUtils.showTransactionSavedDialog(requireContext())
                         findNavController().navigateUp()
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        loadingDialog.dismiss()
+                        DialogUtils.showSomethingWentWrongDialog(requireContext())
                     }
                 }
             }
@@ -178,13 +178,6 @@ class BillFragment : Fragment() {
 
     companion object {
         const val PERMISSIONS_REQUEST_LOCATION = 101
-        fun newInstance(items: ArrayList<BillItem>): BillFragment {
-            val fragment = BillFragment()
-            val args = Bundle()
-            args.putParcelableArrayList("items", items)
-            fragment.arguments = args
-            return fragment
-        }
     }
 
 }
