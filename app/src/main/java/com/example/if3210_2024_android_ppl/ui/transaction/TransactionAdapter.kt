@@ -30,7 +30,12 @@ class TransactionAdapter (private val transactions: ArrayList<Transaction>, priv
         holder.view.findViewById<TextView>(R.id.text_date).text = transaction.date
         holder.view.findViewById<TextView>(R.id.text_title).text = transaction.name
         holder.view.findViewById<TextView>(R.id.text_price).text = transaction.price.toString()
-        holder.view.findViewById<TextView>(R.id.text_location).text = transaction.location
+        val locationText = if (transaction.location?.length!! > 15) {
+            transaction.location.substring(0, 15) + "..."
+        } else {
+            transaction.location
+        }
+        holder.view.findViewById<TextView>(R.id.text_location).text = locationText
         holder.view.findViewById<TextView>(R.id.text_category).text = transaction.category
         holder.view.findViewById<LinearLayout>(R.id.transaction_container).setOnClickListener{
             listener.onClick(transaction)
