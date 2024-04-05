@@ -33,7 +33,7 @@ Aplikasi BondoMan merupakan sebuah aplikasi yang bertujuan untuk memudahkan peng
 - send to email 
 - ![send to email](screenshot/email.jpg)
 - jwt expired 
-- ![jwt expired](screenshot/Expired.jpg)
+- ![jwt expired](screenshot/expired.jpg)
 
 ## Pembagian kerja 
 - 13521015 - Hidayatullah Wildan Ghaly B (+-25 jam kerja & +-6 jam persiapan)
