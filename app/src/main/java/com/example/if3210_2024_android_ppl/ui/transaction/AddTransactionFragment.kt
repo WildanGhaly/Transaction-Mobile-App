@@ -42,6 +42,7 @@ class AddTransactionFragment : Fragment() {
 
     private lateinit var locationHelper: LocationHelper
     private val randomTransactionReceiver = RandomTransactionReceiver()
+    private var date: String? = LocalDate.now().toString()
 
     companion object {
         private const val PERMISSIONS_REQUEST_LOCATION = 1002
@@ -165,8 +166,10 @@ class AddTransactionFragment : Fragment() {
                     view?.findViewById<EditText>(R.id.addTextTitle)?.setText(transaction.name)
                     view?.findViewById<EditText>(R.id.addQuantity)?.setText(transaction.quantity.toString())
                     view?.findViewById<EditText>(R.id.addPrice)?.setText(transaction.price.toString())
-                    view?.findViewById<EditText>(R.id.addLocation)?.setText(transaction.location)
+                    val locationText = "${transaction.location} (${transaction.latitude}, ${transaction.longitude})"
+                    view?.findViewById<EditText>(R.id.addLocation)?.setText(locationText)
                     view?.findViewById<AutoCompleteTextView>(R.id.addCategory)?.setText(transaction.category)
+                    date = transaction.date
                 }
             }
         }
@@ -216,7 +219,7 @@ class AddTransactionFragment : Fragment() {
                             quantityText,
                             priceText,
                             locationName,
-                            currentDate,
+                            date,
                             categoryText,
                             latitude,
                             longitude
