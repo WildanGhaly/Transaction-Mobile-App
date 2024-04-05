@@ -21,19 +21,21 @@ class ExcelFileCreator(private val context: Context) {
         // Define header
         val headerRow = sheet.createRow(0)
         headerRow.createCell(0).setCellValue("Title")
-        headerRow.createCell(1).setCellValue("Price")
-        headerRow.createCell(2).setCellValue("Category")
-        headerRow.createCell(3).setCellValue("Location")
-        headerRow.createCell(4).setCellValue("Date")
+        headerRow.createCell(1).setCellValue("Quantity")
+        headerRow.createCell(2).setCellValue("Price")
+        headerRow.createCell(3).setCellValue("Category")
+        headerRow.createCell(4).setCellValue("Location")
+        headerRow.createCell(5).setCellValue("Date")
 
         // Fill data
         transactions.forEachIndexed { index, transaction ->
             val row = sheet.createRow(index + 1)
-            row.createCell(0).setCellValue(transaction.name ?: "")
-            row.createCell(1).setCellValue(transaction.price?.toDouble() ?: 0.0)
-            row.createCell(2).setCellValue(transaction.category ?: "")
-            row.createCell(3).setCellValue(transaction.location ?: "")
-            row.createCell(4).setCellValue(transaction.date ?: "")
+            row.createCell(0).setCellValue(transaction.name ?: "Random")
+            row.createCell(1).setCellValue(transaction.quantity ?.toString() ?: "1")
+            row.createCell(2).setCellValue(transaction.price?.toDouble() ?: 0.0)
+            row.createCell(3).setCellValue(transaction.category ?: "")
+            row.createCell(4).setCellValue(transaction.location ?: "")
+            row.createCell(5).setCellValue(transaction.date ?: "")
         }
 
         // Save to a temp file
