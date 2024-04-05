@@ -7,20 +7,33 @@ Aplikasi BondoMan merupakan sebuah aplikasi yang bertujuan untuk memudahkan peng
 
 
 ## App overview
-- login ![login](screenshot/login.jpg)
+- login 
+  ![login](screenshot/login.jpg)
   <!-- add login image from screenshot folder -->
-- transaction ![transaction](screenshot/transactionlist.jpg)
-- add transaction ![add transaction](screenshot/addTransaction.jpg)
-- graph ![graph](screenshot/graph.jpg)
-- scan Bill ![scan bill](screenshot/scan.jpg)
-- add transaction from bill ![add transaction from bill](screenshot/saveItemFromBill.jpg)
-- something went wrong ![something went wrong](screenshot/somethingWentWrong.jpg)
-- twibbon ![twibbon](screenshot/twibbongede.jpg)
-- setting ![setting](screenshot/setting.jpg)
-- no network ![no network](screenshot/networkSensing.jpg)
-- save to excel ![save to excel](screenshot/fileSaved.jpg)
-- send to email ![send to email](screenshot/email.jpg)
-- jwt expired ![jwt expired](screenshot/Expired.jpg)
+- transaction 
+  ![transaction](screenshot/transactionlist.jpg)
+- add transaction 
+  ![add transaction](screenshot/addTransaction.jpg)
+- graph 
+  ![graph](screenshot/graph.jpg)
+- scan Bill 
+  ![scan bill](screenshot/scan.jpg)
+- add transaction from bill 
+  ![add transaction from bill](screenshot/saveItemFromBill.jpg)
+- something went wrong 
+  ![something went wrong](screenshot/somethingWentWrong.jpg)
+- twibbon 
+  ![twibbon](screenshot/twibbongede.jpg)
+- setting 
+  ![setting](screenshot/setting.jpg)
+- no network 
+  ![no network](screenshot/networkSensing.jpg)
+- save to excel 
+  ![save to excel](screenshot/fileSaved.jpg)
+- send to email 
+  ![send to email](screenshot/email.jpg)
+- jwt expired 
+  ![jwt expired](screenshot/Expired.jpg)
 
 ## Pembagian kerja 
 - 13521015 - Hidayatullah Wildan Ghaly B (+-25 jam kerja & +-6 jam persiapan)
