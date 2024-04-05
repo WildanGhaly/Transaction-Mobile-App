@@ -24,6 +24,19 @@ abstract class TransactionDatabase: RoomDatabase() {
             }
         }
 
+        fun getDatabase(context: Context): TransactionDatabase {
+            val tempInstance = INSTANCE
+            if (tempInstance != null){
+                return  tempInstance
+            }
+            synchronized(this) {
+                val instance = buildDatabase(context.applicationContext)
+                INSTANCE = instance
+                return instance
+
+            }
+        }
+
         private fun buildDatabase(context: Context) = Room.databaseBuilder(
             context.applicationContext,
             TransactionDatabase::class.java,

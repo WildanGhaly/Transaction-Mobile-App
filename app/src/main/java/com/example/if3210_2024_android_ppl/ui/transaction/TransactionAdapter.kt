@@ -1,4 +1,4 @@
-package com.example.if3210_2024_android_ppl.database.transaction
+package com.example.if3210_2024_android_ppl.ui.transaction
 
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +9,7 @@ import android.widget.TextView
 import android.widget.Button
 import androidx.recyclerview.widget.RecyclerView
 import com.example.if3210_2024_android_ppl.R
+import com.example.if3210_2024_android_ppl.database.transaction.Transaction
 
 class TransactionAdapter (private val transactions: ArrayList<Transaction>, private val listener: OnAdapterListener) : RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
 
@@ -26,6 +27,7 @@ class TransactionAdapter (private val transactions: ArrayList<Transaction>, priv
 
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val transaction = transactions[position]
+        holder.view.findViewById<TextView>(R.id.text_date).text = transaction.date
         holder.view.findViewById<TextView>(R.id.text_title).text = transaction.name
         holder.view.findViewById<TextView>(R.id.text_price).text = transaction.price.toString()
         holder.view.findViewById<TextView>(R.id.text_location).text = transaction.location

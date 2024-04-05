@@ -8,7 +8,6 @@ import android.widget.Toast
 class EmailSender(private val context: Context) {
     fun sendEmailWithAttachment(email: String, subject: String, body: String, fileUri: Uri, mimeType: String) {
         val emailIntent = Intent(Intent.ACTION_SEND).apply {
-            data = Uri.parse("mailto:")
             type = mimeType
             putExtra(Intent.EXTRA_EMAIL, arrayOf(email))
             putExtra(Intent.EXTRA_SUBJECT, subject)
@@ -19,13 +18,9 @@ class EmailSender(private val context: Context) {
         }
 
         try {
-            if (emailIntent.resolveActivity(context.packageManager) != null) {
-                context.startActivity(emailIntent)
-            } else {
-                throw android.content.ActivityNotFoundException()
-            }
+            context.startActivity(Intent.createChooser(emailIntent, "Choose an email client"))
         } catch (ex: android.content.ActivityNotFoundException) {
-            Toast.makeText(context, "Gmail is not installed.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "No email clients installed.", Toast.LENGTH_SHORT).show()
         }
     }
 }

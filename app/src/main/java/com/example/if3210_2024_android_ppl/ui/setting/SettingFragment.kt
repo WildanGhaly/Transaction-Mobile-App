@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -37,6 +38,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.File
+import kotlin.random.Random
 
 class SettingFragment : Fragment() {
 
@@ -185,11 +187,17 @@ class SettingFragment : Fragment() {
 
         binding.buttonRandomizeTransaction.setOnClickListener {
             val randomTitle = generateRandomTitle()
+            val randomQuantity = generateRandomQuantity()
+            val randomPrice = generateRandomPrice()
+            val randomCategory = generateRandomCategory()
             Log.d("Main Activity", "dbResponse: $randomTitle")
 
             // Broadcast intent with random transaction details
             val intent = Intent("com.example.if3210_2024_android_ppl.RANDOM_TRANSACTION")
             intent.putExtra("title", randomTitle)
+            intent.putExtra("quantity", randomQuantity)
+            intent.putExtra("price", randomPrice)
+            intent.putExtra("category", randomCategory)
             LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(intent)
 
             findNavController().navigate(R.id.navigation_addTransaction)
@@ -209,10 +217,22 @@ class SettingFragment : Fragment() {
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(randomTransactionReceiver)
     }
 
-    // Function to generate a random title
     private fun generateRandomTitle(): String {
         val titles = listOf("Groceries", "Electronics", "Clothing", "Books", "Restaurant", "Travel")
         return titles.random()
+    }
+
+    private fun generateRandomQuantity(): Int {
+        return Random.nextInt(1, 101)
+    }
+
+    private fun generateRandomPrice(): Double {
+        return String.format("%.2f", Random.nextDouble(1.0, 1000.0)).toDouble()
+    }
+
+    private fun generateRandomCategory(): String {
+        val category = listOf("Pembelian", "Pemasukan")
+        return category.random()
     }
 
     private fun saveFileToExternalStorage(fileName: String, mimeType: String, fileUri: Uri) {

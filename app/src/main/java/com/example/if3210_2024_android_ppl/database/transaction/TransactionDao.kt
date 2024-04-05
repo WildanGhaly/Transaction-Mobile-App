@@ -27,6 +27,6 @@ interface TransactionDao {
     @Query("SELECT * FROM transaction_table WHERE id=:id")
     suspend fun getTransactions(id: Int): List<Transaction>
 
-    @Query("SELECT * FROM transaction_table WHERE idUser=:id")
+    @Query("SELECT * FROM transaction_table WHERE idUser=:id ORDER BY id DESC")
     suspend fun getTransactions(id: String?): List<Transaction>
 }

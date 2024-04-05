@@ -9,10 +9,15 @@ class RandomTransactionReceiver : BroadcastReceiver() {
 
     companion object {
         var title: String? = null
+        var quantity: Int = 0
+        var price: Double? = 0.0
+        var category: String? = null
     }
 
     override fun onReceive(context: Context?, intent: Intent?) {
         title = intent?.getStringExtra("title")
-        Log.d("Main Activity", "dbResponse : $title")
+        quantity = intent?.getIntExtra("quantity", 0) ?: 0 // Use the Elvis operator to handle null case
+        price = intent?.getDoubleExtra("price", 0.0)
+        category = intent?.getStringExtra("category")
     }
 }

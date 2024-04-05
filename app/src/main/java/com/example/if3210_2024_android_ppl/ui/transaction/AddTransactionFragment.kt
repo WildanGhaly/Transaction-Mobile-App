@@ -1,12 +1,8 @@
 package com.example.if3210_2024_android_ppl.ui.transaction
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
+import android.Manifest
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.location.Geocoder
-import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,36 +13,40 @@ import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.if3210_2024_android_ppl.R
 import com.example.if3210_2024_android_ppl.database.transaction.Transaction
 import com.example.if3210_2024_android_ppl.database.transaction.TransactionDatabase
+import com.example.if3210_2024_android_ppl.database.transaction.TransactionViewModel
 import com.example.if3210_2024_android_ppl.database.user.UserViewModel
 import com.example.if3210_2024_android_ppl.ui.setting.RandomTransactionReceiver
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import com.example.if3210_2024_android_ppl.util.LocationHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.time.LocalDate
-import java.util.*
 
 class AddTransactionFragment : Fragment() {
 
     private val db by lazy { TransactionDatabase(requireContext()) }
     private lateinit var userViewModel: UserViewModel
+    private lateinit var transactionViewModel: TransactionViewModel
     private var transactionId: Int = 0
     private val listItem = arrayOf(
         "Pembelian", "Pemasukan"
     )
 
-    lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var locationHelper: LocationHelper
     private val randomTransactionReceiver = RandomTransactionReceiver()
+    private var date: String? = LocalDate.now().toString()
+
+    companion object {
+        private const val PERMISSIONS_REQUEST_LOCATION = 1002
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -64,15 +64,41 @@ class AddTransactionFragment : Fragment() {
 
         setupListener(view)
 
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
+        val permissionFineLocation = ActivityCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+        val permissionCoarseLocation = ActivityCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+        if (permissionFineLocation != PackageManager.PERMISSION_GRANTED || permissionCoarseLocation != PackageManager.PERMISSION_GRANTED) {
+            // Request both fine and coarse location permissions
+            requestPermissions(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ), PERMISSIONS_REQUEST_LOCATION
+            )
+        } else {
+            // Permissions are already granted, proceed with the location fetching
+        }
+
+        locationHelper = LocationHelper(requireContext())
         view.findViewById<EditText>(R.id.addLocation).setOnClickListener {
-            getLocationDetails { locationName, latitude, longitude ->
-                if (locationName != null && latitude != null && longitude != null) {
-                    Toast.makeText(requireContext(), locationName, Toast.LENGTH_SHORT).show()
-                    Log.d("Location", "Latitude: $latitude, Longitude: $longitude")
+            locationHelper.getLocationDetails { locationName, latitude, longitude ->
+                Toast.makeText(requireContext(), "Getting Your Current Location", Toast.LENGTH_SHORT).show()
+                if (ActivityCompat.checkSelfPermission(
+                        requireContext(),
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                        requireContext(),
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
                     view.findViewById<EditText>(R.id.addLocation).setText("$locationName ($latitude, $longitude)")
                 } else {
-                    Toast.makeText(requireContext(), "Unknown Location", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Input Your Location Manually", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -86,9 +112,16 @@ class AddTransactionFragment : Fragment() {
         }
 
         userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
+        transactionViewModel = ViewModelProvider(this).get(TransactionViewModel::class.java)
 
         val title = RandomTransactionReceiver.title
+        val quantity = RandomTransactionReceiver.quantity
+        val price = RandomTransactionReceiver.price
+        val category = RandomTransactionReceiver.category
         view.findViewById<EditText>(R.id.addTextTitle).setText(title)
+        view.findViewById<EditText>(R.id.addQuantity).setText(quantity.toString())
+        view.findViewById<EditText>(R.id.addPrice).setText(price.toString())
+        view.findViewById<EditText>(R.id.addCategory).setText(category)
 
         return view
     }
@@ -97,38 +130,6 @@ class AddTransactionFragment : Fragment() {
 
         saveButton.setOnClickListener {
             saveTransaction(view)
-        }
-    }
-
-    private fun getLocationDetails(callback: (locationName: String?, latitude: Double?, longitude: Double?) -> Unit) {
-        val task = fusedLocationProviderClient.lastLocation
-        if (ActivityCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED && ActivityCompat
-                .checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            // Handle the case where permissions are not granted
-            callback.invoke(null, null, null)
-            return
-        }
-        task.addOnSuccessListener { location ->
-            if (location != null) {
-                val geocoder = Geocoder(requireContext(), Locale.getDefault())
-                val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-                if (addresses?.isNotEmpty() == true) {
-                    val address = addresses[0]
-                    val locationName = address.getAddressLine(0)
-                    val latitude = location.latitude
-                    val longitude = location.longitude
-                    callback.invoke(locationName, latitude, longitude)
-                } else {
-                    // If no address found, return null values
-                    callback.invoke(null, null, null)
-                }
-            } else {
-                // If location is null, return null values
-                callback.invoke(null, null, null)
-            }
         }
     }
 
@@ -146,6 +147,13 @@ class AddTransactionFragment : Fragment() {
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(randomTransactionReceiver)
     }
 
+    fun resetTransactionData() {
+        RandomTransactionReceiver.title = null
+        RandomTransactionReceiver.quantity = 0
+        RandomTransactionReceiver.price = 0.0
+        RandomTransactionReceiver.category = null
+    }
+
 
     private fun populateTransactionDetails(transactionId: Int) {
         // Coroutine for fetching transaction details from the database
@@ -158,8 +166,10 @@ class AddTransactionFragment : Fragment() {
                     view?.findViewById<EditText>(R.id.addTextTitle)?.setText(transaction.name)
                     view?.findViewById<EditText>(R.id.addQuantity)?.setText(transaction.quantity.toString())
                     view?.findViewById<EditText>(R.id.addPrice)?.setText(transaction.price.toString())
-                    view?.findViewById<EditText>(R.id.addLocation)?.setText(transaction.location)
+                    val locationText = "${transaction.location} (${transaction.latitude}, ${transaction.longitude})"
+                    view?.findViewById<EditText>(R.id.addLocation)?.setText(locationText)
                     view?.findViewById<AutoCompleteTextView>(R.id.addCategory)?.setText(transaction.category)
+                    date = transaction.date
                 }
             }
         }
@@ -201,34 +211,30 @@ class AddTransactionFragment : Fragment() {
                 val transactionId = arguments?.getInt("transactionId", 0)
                 if (transactionId != null && transactionId != 0) {
                     // If transactionId is provided and not 0, update the existing transaction
-                    CoroutineScope(Dispatchers.IO).launch {
-                        db.transactionDao().updateTransaction(
-                            Transaction(
-                                transactionId,
-                                email, // You may need to pass the user ID or any other relevant ID here
-                                titleText,
-                                quantityText,
-                                priceText,
-                                locationName,
-                                currentDate,
-                                categoryText,
-                                latitude,
-                                longitude
-                            )
+                    transactionViewModel.updateTransaction(
+                        Transaction(
+                            transactionId,
+                            email, // You may need to pass the user ID or any other relevant ID here
+                            titleText,
+                            quantityText,
+                            priceText,
+                            locationName,
+                            date,
+                            categoryText,
+                            latitude,
+                            longitude
                         )
-                        requireActivity().runOnUiThread {
-                            findNavController().navigateUp()
-                        }
+                    )
+                    requireActivity().runOnUiThread {
+                        findNavController().navigateUp()
                     }
                 } else {
                     // If transactionId is not provided or 0, it means it's for adding a new transaction
-                    CoroutineScope(Dispatchers.IO).launch {
-                        db.transactionDao().addTransaction(
-                            Transaction(0, email, titleText, quantityText, priceText, locationName, currentDate, categoryText, latitude, longitude)
-                        )
-                        requireActivity().runOnUiThread {
-                            findNavController().navigateUp()
-                        }
+                    transactionViewModel.addTransaction(
+                        Transaction(0, email, titleText, quantityText, priceText, locationName, currentDate, categoryText, latitude, longitude)
+                    )
+                    requireActivity().runOnUiThread {
+                        findNavController().navigateUp()
                     }
                 }
             } else {
@@ -239,6 +245,7 @@ class AddTransactionFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        resetTransactionData()
     }
 }
 
