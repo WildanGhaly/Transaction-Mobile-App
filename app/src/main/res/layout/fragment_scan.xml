@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.scan.ScanFragment">
+
+    <androidx.camera.view.PreviewView
+        android:id="@+id/prev"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        >
+    </androidx.camera.view.PreviewView>
+    <ImageView
+        android:id="@+id/frame"
+        android:layout_alignParentBottom="true"
+        android:paddingTop="150dp"
+        android:layout_width="900dp"
+        android:layout_height="900dp"
+
+        android:src="@drawable/duck"
+        android:contentDescription="frame" />
+    <ImageButton
+        android:id="@+id/shutterBut"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:background="@drawable/shutter"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="175dp"
+        android:layout_centerInParent="true"
+        />
+    <ImageButton
+        android:id="@+id/pictBut"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@drawable/image"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="70dp"
+        android:layout_marginStart="30dp"
+        />
+    <ImageButton
+        android:id="@+id/frameBut"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:background="@drawable/frame"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="70dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="30dp"
+        />
+
+
+
+
+
+</RelativeLayout>
