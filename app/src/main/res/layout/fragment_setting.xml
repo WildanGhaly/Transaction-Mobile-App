@@ -59,7 +59,7 @@
                 android:gravity="start|center_vertical"
                 android:drawableEnd="@drawable/ic_send"
                 android:textFontWeight="600"
-                android:textColor="@color/black"
+                android:textColor="?attr/colorSecondary"
                 android:background="@drawable/button_rounded_border"/>
 
             <Button
@@ -72,7 +72,7 @@
                 android:gravity="start|center_vertical"
                 android:drawableEnd="@drawable/ic_save"
                 android:background="@drawable/button_rounded_border"
-                android:textColor="@color/black"/>
+                android:textColor="?attr/colorSecondary"/>
 
             <Button
                 android:id="@+id/buttonRandomizeTransaction"
@@ -84,7 +84,7 @@
                 android:gravity="start|center_vertical"
                 android:drawableEnd="@drawable/ic_shuffle"
                 android:background="@drawable/button_rounded_border"
-                android:textColor="@color/black"/>
+                android:textColor="?attr/colorSecondary"/>
 
         </LinearLayout>
 

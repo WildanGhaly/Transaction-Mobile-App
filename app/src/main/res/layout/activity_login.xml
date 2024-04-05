@@ -10,9 +10,7 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/white"
-            android:alpha="0.7" />
+            android:layout_height="match_parent"/>
 
         <LinearLayout
             android:id="@+id/linearLayout"
@@ -33,7 +31,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/login"
-                android:textColor="@color/red_java"
                 android:textFontWeight="600"
                 android:textSize="32sp"
                 android:layout_marginTop="20dp"
@@ -55,7 +52,7 @@
                     android:textFontWeight="600"
                     android:textSize="18sp"
                     android:layout_marginStart="0dp"
-                    android:textColor="@android:color/black"/>
+                    />
 
                 <EditText
                     android:id="@+id/editTextEmail"
@@ -64,7 +61,6 @@
                     android:background="@drawable/login_input_field"
                     android:inputType="textEmailAddress"
                     android:padding="15dp"
-                    android:textColor="@android:color/black"
                     android:textSize="18sp"
                     android:labelFor="@+id/login_text_email"
                     android:hint="@string/insert_your_email"
@@ -87,15 +83,13 @@
                     android:textFontWeight="600"
                     android:text="@string/password"
                     android:layout_marginStart="0dp"
-                    android:textSize="18sp"
-                    android:textColor="@android:color/black"/>
+                    android:textSize="18sp"/>
 
                 <EditText
                     android:id="@+id/editTextPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/login_input_field"
-                    android:textColor="@android:color/black"
                     android:padding="15dp"
                     android:inputType="textPassword"
                     android:autofillHints="Insert your password"
@@ -112,7 +106,6 @@
                 android:text="@string/login_button_text"
                 android:textSize="18sp"
                 android:textFontWeight="700"
-                android:textColor="@android:color/white"
                 android:background="@drawable/rounded_button"
                 android:paddingStart="40dp"
                 android:paddingEnd="40dp"
