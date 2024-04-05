@@ -11,7 +11,7 @@ Aplikasi BondoMan merupakan sebuah aplikasi yang bertujuan untuk memudahkan peng
 - ![login](screenshot/login.jpg)
   <!-- add login image from screenshot folder -->
 - transaction 
-- ![transaction](screenshot/transactionlist.jpg)
+- ![transaction](screenshot/transactionList.jpg)
 - add transaction 
 - ![add transaction](screenshot/addTransaction.jpg)
 - graph 
