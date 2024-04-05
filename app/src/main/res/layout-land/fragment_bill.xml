@@ -23,7 +23,6 @@
         android:gravity="center"
         android:text="@string/button_save"
         android:textColor="?attr/colorSecondary"
-        android:layout_marginBottom="100dp"
         android:textFontWeight="600" />
 
 </LinearLayout>

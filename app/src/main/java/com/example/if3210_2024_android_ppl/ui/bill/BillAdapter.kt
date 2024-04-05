@@ -17,8 +17,8 @@ class BillAdapter(private val items: List<BillItem>) : RecyclerView.Adapter<Bill
 
         fun bind(item: BillItem) {
             nameTextView.text = item.name
-            quantityTextView.text = "Qty: ${item.qty}"
-            priceTextView.text = "Price: ${item.price}"
+            quantityTextView.text = "x${item.qty}"
+            priceTextView.text = "$${item.price}"
         }
     }
 

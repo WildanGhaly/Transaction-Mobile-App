@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -90,7 +91,7 @@ class BillFragment : Fragment() {
         setupRecyclerView(billItems)
 
         // Setting up the ImageButton click listener
-        val saveButton = view.findViewById<ImageButton>(R.id.save_button)
+        val saveButton = view.findViewById<Button>(R.id.save_button)
         saveButton.setOnClickListener {
             val loadingDialog = DialogUtils.showLoadingDialog(requireContext())
             fetchAndSaveLocation(billItems, loadingDialog)

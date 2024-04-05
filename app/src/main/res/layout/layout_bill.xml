@@ -5,22 +5,37 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <TextView
-        android:id="@+id/itemNameTextView"
+    <!-- Item 1 -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceListItem" />
+        android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/itemQuantityTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceListItem" />
+        <TextView
+            android:id="@+id/itemNameTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Mi Goreng"
+            android:textFontWeight="600"
+            android:textAppearance="?attr/textAppearanceListItem" />
 
-    <TextView
-        android:id="@+id/itemPriceTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceListItem" />
+        <TextView
+            android:id="@+id/itemQuantityTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textFontWeight="600"
+            android:layout_weight="1"
+            android:text="6"
+            android:textAppearance="?attr/textAppearanceListItem" />
+
+        <TextView
+            android:id="@+id/itemPriceTextView"
+            android:layout_width="wrap_content"
+            android:textColor="@color/red_java"
+            android:layout_height="wrap_content"
+            android:text="Rp15.000"
+            android:textAppearance="?attr/textAppearanceListItem" />
+    </LinearLayout>
 
 </LinearLayout>
